@@ -1,5 +1,6 @@
 import * as express from 'express';
 import usersRouter from './users/users.route';
+import boardRouter from './board/board.route';
 
 class Server {
   public app: express.Application;
@@ -10,8 +11,8 @@ class Server {
   }
 
   private setRoute() {
-    // usersRouter 등록
     this.app.use(usersRouter);
+    this.app.use(boardRouter);
   }
 
   private setMiddleware() {

@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var express = require("express");
 var users_route_1 = require("./users/users.route");
+var board_route_1 = require("./board/board.route");
 var Server = (function () {
     function Server() {
         var app = express();
@@ -9,6 +10,7 @@ var Server = (function () {
     }
     Server.prototype.setRoute = function () {
         this.app.use(users_route_1.default);
+        this.app.use(board_route_1.default);
     };
     Server.prototype.setMiddleware = function () {
         var app = express();
