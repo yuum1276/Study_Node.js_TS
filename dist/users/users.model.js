@@ -5,32 +5,32 @@ exports.User = [
     {
         id: 'fsduifh',
         name: 'blue',
-        age: 8,
-        friends: ['asdfhj29009', 'WE09tju2j'],
+        email: 'aaa@agadfafd',
+        password: 'asdfadf',
     },
     {
         id: 'iohf2309q4hr',
         name: 'som',
-        age: 4,
-        friends: ['weju0fj20qj', 'asdfhj29009', 'weju0fj20qj'],
+        email: 'aaa@adfadfdf',
+        password: 'asdfadf',
     },
     {
         id: 'WE09tju2j',
         name: 'lean',
-        age: 6,
-        friends: [],
+        email: 'ddd@agdfadf',
+        password: 'asdfadf',
     },
     {
         id: 'asdfhj29009',
         name: 'star',
-        age: 10,
-        friends: ['weju0fj20qj'],
+        email: 'cvv@afdafda',
+        password: 'asdfadf',
     },
     {
         id: 'weju0fj20qj',
         name: 'red',
-        age: 2,
-        friends: [],
+        email: 'adf@adfadf',
+        password: 'asdfadf',
     },
 ];
 //# sourceMappingURL=users.model.js.map

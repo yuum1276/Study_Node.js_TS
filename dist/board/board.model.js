@@ -4,27 +4,32 @@ exports.Board = void 0;
 exports.Board = [
     {
         id: 'fsduifh',
-        title: 'blue',
+        name: 'blue',
+        title: '123',
         content: 'aaa',
     },
     {
         id: 'iohf2309q4hr',
-        title: 'som',
+        name: 'som',
+        title: '456',
         content: 'aaa',
     },
     {
         id: 'WE09tju2j',
-        title: 'lean',
+        name: 'lean',
+        title: '789',
         content: 'aaaa',
     },
     {
         id: 'asdfhj29009',
-        title: 'star',
+        name: 'star',
+        title: '10132',
         content: 'aaaaaaaaa',
     },
     {
         id: 'weju0fj20qj',
-        title: 'red',
+        name: 'red',
+        title: '545413',
         content: 'aaaaaaaaaaaaaaa',
     },
 ];

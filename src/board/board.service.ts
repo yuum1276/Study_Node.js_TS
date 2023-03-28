@@ -39,11 +39,12 @@ export const getPost = (req: Request, res: Response) => {
 
 export const createPost = (req: Request, res: Response) => {
   try {
-    const data = req.body;
-    Board.push(data);
+    const post = req.body;
+    console.log(post);
+    Board.push(post);
     res.status(200).send({
       success: true,
-      data: { data },
+      data: { post },
     });
   } catch (error) {
     res.status(400).send({
@@ -66,7 +67,7 @@ export const updatePost = (req: Request, res: Response) => {
     res.status(200).send({
       success: true,
       data: {
-        post: result,
+        result,
       },
     });
   } catch (error) {
@@ -90,7 +91,7 @@ export const updatePart = (req: Request, res: Response) => {
     res.status(200).send({
       success: true,
       data: {
-        post: result,
+        result,
       },
     });
   } catch (error) {

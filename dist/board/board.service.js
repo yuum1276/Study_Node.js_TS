@@ -53,11 +53,12 @@ var getPost = function (req, res) {
 exports.getPost = getPost;
 var createPost = function (req, res) {
     try {
-        var data = req.body;
-        board_model_1.Board.push(data);
+        var post = req.body;
+        console.log(post);
+        board_model_1.Board.push(post);
         res.status(200).send({
             success: true,
-            data: { data: data },
+            data: { post: post },
         });
     }
     catch (error) {
@@ -81,7 +82,7 @@ var updatePost = function (req, res) {
         res.status(200).send({
             success: true,
             data: {
-                post: result_1,
+                result: result_1,
             },
         });
     }
@@ -106,7 +107,7 @@ var updatePart = function (req, res) {
         res.status(200).send({
             success: true,
             data: {
-                post: result_2,
+                result: result_2,
             },
         });
     }
