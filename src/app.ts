@@ -1,6 +1,6 @@
 import * as express from 'express';
 import usersRouter from './users/users.route';
-import boardRouter from './board/board.route';
+import boardRouter from './posts/post.route';
 import { createConnection } from 'mysql2/promise';
 
 // const { validationResult } = require('express-validator');
