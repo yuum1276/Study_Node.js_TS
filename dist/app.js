@@ -14,6 +14,9 @@ var Server = (function () {
             password: "dbal3326@@",
             database: "node_ts",
         });
+        con.then(function () {
+            console.log('연결 성공');
+        });
     }
     Server.prototype.setRoute = function () {
         this.app.use(users_route_1.default);

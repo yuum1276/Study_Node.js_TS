@@ -18,8 +18,9 @@ class Server {
       password:"dbal3326@@",
       database: "node_ts",
     })
-
-  
+    con.then(()=>{
+      console.log('연결 성공');
+    })
   }
 
   private setRoute() {
