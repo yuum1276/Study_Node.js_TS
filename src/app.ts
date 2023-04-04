@@ -1,31 +1,25 @@
 import * as express from 'express';
 import usersRouter from './users/users.route';
 import boardRouter from './board/board.route';
-const mysql = require('mysql');
-const { validationResult } = require('express-validator');
+import { createConnection } from 'mysql2/promise';
 
-const con = mysql.createConnection({
-  host: 'localhost',
-  user: 'node_ts',
-  password: 'dbal3326@@',
-  database: 'node_ts',
-});
+// const { validationResult } = require('express-validator');
 
 class Server {
   public app: express.Application;
 
   constructor() {
     const app: express.Application = express();
-
-    con.connect(function (err: any) {
-      if (err) {
-        console.log(err);
-      } else {
-        console.log('mysql connected.');
-      }
-    });
-
     this.app = app;
+
+    const con = createConnection({
+      host: "localhost",
+      user: "root",
+      password:"dbal3326@@",
+      database: "node_ts",
+    })
+
+  
   }
 
   private setRoute() {
@@ -49,13 +43,13 @@ class Server {
     this.setRoute();
 
     // validator middleware
-    this.app.use((req, res, next) => {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-      }
-      next();
-    });
+    // this.app.use((req, res, next) => {
+    //   const errors = validationResult(req);
+    //   if (!errors.isEmpty()) {
+    //     return res.status(400).json({ errors: errors.array() });
+    //   }
+    //   next();
+    // });
 
     // 404 middleware
     this.app.use((req, res, next) => {

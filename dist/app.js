@@ -3,26 +3,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var express = require("express");
 var users_route_1 = require("./users/users.route");
 var board_route_1 = require("./board/board.route");
-var mysql = require('mysql');
-var validationResult = require('express-validator').validationResult;
-var con = mysql.createConnection({
-    host: 'localhost',
-    user: 'node_ts',
-    password: 'dbal3326@@',
-    database: 'node_ts',
-});
+var promise_1 = require("mysql2/promise");
 var Server = (function () {
     function Server() {
         var app = express();
-        con.connect(function (err) {
-            if (err) {
-                console.log(err);
-            }
-            else {
-                console.log('mysql connected.');
-            }
-        });
         this.app = app;
+        var con = promise_1.createConnection({
+            host: "localhost",
+            user: "root",
+            password: "dbal3326@@",
+            database: "node_ts",
+        });
     }
     Server.prototype.setRoute = function () {
         this.app.use(users_route_1.default);
@@ -38,13 +29,6 @@ var Server = (function () {
         this.app.use(express.json());
         this.app.use(express.urlencoded({ extended: false }));
         this.setRoute();
-        this.app.use(function (req, res, next) {
-            var errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                return res.status(400).json({ errors: errors.array() });
-            }
-            next();
-        });
         this.app.use(function (req, res, next) {
             console.log('This is error middleware');
             res.send({ error: '404 not found error' });
