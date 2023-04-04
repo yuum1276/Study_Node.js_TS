@@ -6,7 +6,7 @@ import {
   getPostList,
   updatePart,
   updatePost,
-} from './board.service';
+} from './post.service';
 
 const router = Router();
 

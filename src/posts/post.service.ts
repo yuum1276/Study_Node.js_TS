@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { Board } from './board.model';
+import { Board } from './post.model';
 
 export const getPostList = (req: Request, res: Response) => {
   try {

@@ -2,7 +2,6 @@ import { Request, Response } from 'express';
 import { User, Users } from './users.model';
 import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
-import { rejects } from 'assert';
 
 const users: Users[] = [];
 
@@ -47,7 +46,7 @@ export const createUser = async (req: Request, res: Response) => {
 
   const existingUser = users.find((user) => user.name === name);
   if (existingUser) {
-    return res.send('이미 사용중입니당dfd');
+    return res.send('이미 사용중입니당');
   }
 
   const newUser: Users = { id: uuidv4(), name, password, email };
