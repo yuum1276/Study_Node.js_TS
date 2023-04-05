@@ -1,75 +1,89 @@
-import * as express from 'express';
-import usersRouter from './users/users.route';
-import boardRouter from './posts/post.route';
-import * as mysql from 'mysql2/promise';
+import express, { Request, Response, NextFunction } from 'express';
+import { createConnection } from 'mysql2/promise';
 
-const { validationResult } = require('express-validator');
+const app = express();
+const port = 3000;
 
-class Server {
-  public app: express.Application;
+// Database connection setup
+const dbConfig = {
+  host: 'localhost',
+  user: 'root',
+  password: '0000',
+  database: 'node_ts',
+};
 
-  constructor() {
-    const app: express.Application = express();
-    this.app = app;   
-    const con = mysql.createConnection({
-      host: "localhost",
-      user: "root",
-      password:"dbal3326@@",
-      database: "node_ts",
-    })
-    con.then(()=>{
-      console.log('연결 성공');
-    })
+// Create a connection pool
+const pool = createConnection(dbConfig);
+
+// Middleware to handle errors
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+  console.error(err.stack);
+  res.status(500).send('Something went wrong!');
+});
+
+// User routes
+app.get('/users', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const [rows] = await pool.query(
+      'SELECT id, email, created_at, updated_at FROM users'
+    );
+    res.send(rows);
+  } catch (err) {
+    next(err);
   }
+});
 
-  private setRoute() {
-    this.app.use(usersRouter);
-    this.app.use(boardRouter);
-  }
-
-  private setMiddleware() {
-    const app: express.Express = express();
-
-    // logging middleware
-    this.app.use((req, res, next) => {
-      console.log(req.rawHeaders[1]);
-      console.log('this is logging middleware');
-      next();
-    });
-
-    // json middleware
-    this.app.use(express.json());
-    this.app.use(express.urlencoded({ extended: false }));
-    this.setRoute();
-
-    // validator middleware
-    this.app.use((req, res, next) => {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+app.get(
+  '/users/:id',
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+    try {
+      const [rows] = await pool.query(
+        'SELECT id, email, created_at, updated_at FROM users WHERE id = ?',
+        [id]
+      );
+      if (rows.length === 0) {
+        return res.status(404).send('User not found');
       }
-      next();
-    });
-
-    // 404 middleware
-    this.app.use((req, res, next) => {
-      console.log('This is error middleware');
-      res.send({ error: '404 not found error' });
-    });
+      res.send(rows[0]);
+    } catch (err) {
+      next(err);
+    }
   }
+);
 
-  public listen() {
-    const port: number = 8000;
-    this.setMiddleware();
-    this.app.listen(port, () => {
-      console.log(`App listening at http://localhost:${port}`);
-    });
+// Post routes
+app.get('/posts', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const [rows] = await pool.query(
+      'SELECT id, title, content, created_at, updated_at FROM posts'
+    );
+    res.send(rows);
+  } catch (err) {
+    next(err);
   }
-}
+});
 
-function init() {
-  const server = new Server();
-  server.listen();
-}
+app.get(
+  '/posts/:id',
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+    try {
+      const [rows] = await pool.query(
+        'SELECT id, title, content, created_at, updated_at FROM posts WHERE id = ?',
+        [id]
+      );
+      if (rows.length === 0) {
+        return res.status(404).send('Post not found');
+      }
+      res.send(rows[0]);
+    } catch (err) {
+      next(err);
+    }
+  }
+);
 
-init();
+// Start the server
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});
