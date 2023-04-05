@@ -11,15 +11,15 @@ var __assign = (this && this.__assign) || function () {
     return __assign.apply(this, arguments);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUser = exports.updatePart = exports.updateUser = exports.createUser = exports.getUser = exports.getUserList = void 0;
-var users_model_1 = require("./users.model");
-var getUserList = function (req, res) {
+exports.deletePost = exports.updatePart = exports.updatePost = exports.createPost = exports.getPost = exports.getPostList = void 0;
+var post_model_1 = require("./post.model");
+var getPostList = function (req, res) {
     try {
-        var users = users_model_1.User;
+        var posts = post_model_1.Post;
         res.status(200).send({
             success: true,
             data: {
-                users: users,
+                posts: posts,
             },
         });
     }
@@ -29,18 +29,18 @@ var getUserList = function (req, res) {
         });
     }
 };
-exports.getUserList = getUserList;
-var getUser = function (req, res) {
+exports.getPostList = getPostList;
+var getPost = function (req, res) {
     try {
         var params_1 = req.params;
         console.log(params_1);
-        var user = users_model_1.User.find(function (user) {
-            return user.id === params_1.id;
+        var post = post_model_1.Post.find(function (post) {
+            return post.id === params_1.id;
         });
         res.status(200).send({
             success: true,
             data: {
-                user: user,
+                post: post,
             },
         });
     }
@@ -50,14 +50,15 @@ var getUser = function (req, res) {
         });
     }
 };
-exports.getUser = getUser;
-var createUser = function (req, res) {
+exports.getPost = getPost;
+var createPost = function (req, res) {
     try {
-        var data = req.body;
-        users_model_1.User.push(data);
+        var post = req.body;
+        console.log(post);
+        post_model_1.Post.push(post);
         res.status(200).send({
             success: true,
-            data: { data: data },
+            data: { post: post },
         });
     }
     catch (error) {
@@ -66,22 +67,22 @@ var createUser = function (req, res) {
         });
     }
 };
-exports.createUser = createUser;
-var updateUser = function (req, res) {
+exports.createPost = createPost;
+var updatePost = function (req, res) {
     try {
         var params_2 = req.params;
         var body_1 = req.body;
         var result_1;
-        users_model_1.User.forEach(function (user) {
-            if (user.id === params_2.id) {
-                user = body_1;
-                result_1 = user;
+        post_model_1.Post.forEach(function (post) {
+            if (post.id === params_2.id) {
+                post = body_1;
+                result_1 = post;
             }
         });
         res.status(200).send({
             success: true,
             data: {
-                user: result_1,
+                result: result_1,
             },
         });
     }
@@ -91,22 +92,22 @@ var updateUser = function (req, res) {
         });
     }
 };
-exports.updateUser = updateUser;
+exports.updatePost = updatePost;
 var updatePart = function (req, res) {
     try {
         var params_3 = req.params;
         var body_2 = req.body;
         var result_2;
-        users_model_1.User.forEach(function (user) {
-            if (user.id === params_3.id) {
-                user = __assign(__assign({}, user), body_2);
-                result_2 = user;
+        post_model_1.Post.forEach(function (post) {
+            if (post.id === params_3.id) {
+                post = __assign(__assign({}, post), body_2);
+                result_2 = post;
             }
         });
         res.status(200).send({
             success: true,
             data: {
-                user: result_2,
+                result: result_2,
             },
         });
     }
@@ -117,13 +118,13 @@ var updatePart = function (req, res) {
     }
 };
 exports.updatePart = updatePart;
-var deleteUser = function (req, res) {
+var deletePost = function (req, res) {
     try {
         var params_4 = req.params;
-        var newuser = users_model_1.User.filter(function (user) { return user.id !== params_4.id; });
+        var newpost = post_model_1.Post.filter(function (post) { return post.id !== params_4.id; });
         res.status(200).send({
             success: true,
-            data: newuser,
+            data: newpost,
         });
     }
     catch (error) {
@@ -132,5 +133,5 @@ var deleteUser = function (req, res) {
         });
     }
 };
-exports.deleteUser = deleteUser;
-//# sourceMappingURL=users.service.js.map
+exports.deletePost = deletePost;
+//# sourceMappingURL=post.service.js.map

@@ -1,18 +1,17 @@
 import * as express from 'express';
 import usersRouter from './users/users.route';
 import boardRouter from './posts/post.route';
-import { createConnection } from 'mysql2/promise';
+import * as mysql from 'mysql2/promise';
 
-// const { validationResult } = require('express-validator');
+const { validationResult } = require('express-validator');
 
 class Server {
   public app: express.Application;
 
   constructor() {
     const app: express.Application = express();
-    this.app = app;
-
-    const con = createConnection({
+    this.app = app;   
+    const con = mysql.createConnection({
       host: "localhost",
       user: "root",
       password:"dbal3326@@",
@@ -44,13 +43,13 @@ class Server {
     this.setRoute();
 
     // validator middleware
-    // this.app.use((req, res, next) => {
-    //   const errors = validationResult(req);
-    //   if (!errors.isEmpty()) {
-    //     return res.status(400).json({ errors: errors.array() });
-    //   }
-    //   next();
-    // });
+    this.app.use((req, res, next) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+      next();
+    });
 
     // 404 middleware
     this.app.use((req, res, next) => {

@@ -25,7 +25,7 @@ export const getUser = (req: Request, res: Response) => {
   try {
     const params = req.params;
     console.log(params);
-    const user = User.find((user) => {
+    const user = User.find((user: Users) => {
       return user.id === params.id;
     });
     res.status(200).send({
@@ -42,14 +42,14 @@ export const getUser = (req: Request, res: Response) => {
 };
 
 export const createUser = async (req: Request, res: Response) => {
-  const { name, password, email } = req.body;
+  const { nickname, userId, password } = req.body;
 
-  const existingUser = users.find((user) => user.name === name);
+  const existingUser = users.find((user) => user.userId === userId);
   if (existingUser) {
     return res.send('이미 사용중입니당');
   }
 
-  const newUser: Users = { id: uuidv4(), name, password, email };
+  const newUser: Users = { id: uuidv4(), nickname, password, userId};
   users.push(newUser);
   console.log(newUser);
 
@@ -88,11 +88,11 @@ export const createUser = async (req: Request, res: Response) => {
 };
 
 export const login = (req: Request, res: Response) => {
-  const { email, password } = req.body;
-  if (!email || !password) {
+  const { userId, password } = req.body;
+  if (!userId || !password) {
     return res.status(400).send('이메일과 비밀번호를 입력해주세용');
   }
-  const user = User.find((user) => user.email === email);
+  const user = User.find((user:Users) => user.userId === userId);
   if (!user) {
     return res.status(401).send('이메일을 확인해주세용');
   }
@@ -112,7 +112,7 @@ export const updateUser = (req: Request, res: Response) => {
     const params = req.params;
     const body = req.body;
     let result;
-    User.forEach((user) => {
+    User.forEach((user:Users) => {
       if (user.id === params.id) {
         user = body;
         result = user;
@@ -136,7 +136,7 @@ export const updatePart = (req: Request, res: Response) => {
     const params = req.params;
     const body = req.body;
     let result;
-    User.forEach((user) => {
+    User.forEach((user:Users) => {
       if (user.id === params.id) {
         user = { ...user, ...body };
         result = user;
@@ -182,7 +182,7 @@ export const parted = (req: Request, res: Response) => {
 export const deleteUser = (req: Request, res: Response) => {
   try {
     const params = req.params;
-    const newuser = User.filter((user) => user.id !== params.id);
+    const newuser = User.filter((user:Users) => user.id !== params.id);
     res.status(200).send({
       success: true,
       data: newuser,

@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
-import { Board } from './post.model';
+import { Post } from './post.model';
 
 export const getPostList = (req: Request, res: Response) => {
   try {
-    const posts = Board;
+    const posts = Post;
     res.status(200).send({
       success: true,
       data: {
@@ -21,7 +21,7 @@ export const getPost = (req: Request, res: Response) => {
   try {
     const params = req.params;
     console.log(params);
-    const post = Board.find((post) => {
+    const post = Post.find((post) => {
       return post.id === params.id;
     });
     res.status(200).send({
@@ -41,7 +41,7 @@ export const createPost = (req: Request, res: Response) => {
   try {
     const post = req.body;
     console.log(post);
-    Board.push(post);
+    Post.push(post);
     res.status(200).send({
       success: true,
       data: { post },
@@ -58,7 +58,7 @@ export const updatePost = (req: Request, res: Response) => {
     const params = req.params;
     const body = req.body;
     let result;
-    Board.forEach((post) => {
+    Post.forEach((post) => {
       if (post.id === params.id) {
         post = body;
         result = post;
@@ -82,7 +82,7 @@ export const updatePart = (req: Request, res: Response) => {
     const params = req.params;
     const body = req.body;
     let result;
-    Board.forEach((post) => {
+    Post.forEach((post) => {
       if (post.id === params.id) {
         post = { ...post, ...body };
         result = post;
@@ -104,7 +104,7 @@ export const updatePart = (req: Request, res: Response) => {
 export const deletePost = (req: Request, res: Response) => {
   try {
     const params = req.params;
-    const newpost = Board.filter((post) => post.id !== params.id);
+    const newpost = Post.filter((post) => post.id !== params.id);
     res.status(200).send({
       success: true,
       data: newpost,

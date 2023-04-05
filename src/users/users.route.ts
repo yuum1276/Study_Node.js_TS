@@ -29,9 +29,9 @@ router.post(
 router.post(
   '/login',
   [
-    body('email').exists().isEmail(),
+    body('email').exists().isEmail().withMessage('이메일을 입력해주세요!'),
     body('password').exists().isLength({ min: 10, max: 20 }),
-  ],
+  ],  
   login
 );
 

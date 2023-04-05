@@ -5,7 +5,7 @@ export type Posts = {
   content: string;
 };
 
-export const Board: Posts[] = [
+export const Post: Posts[] = [
   {
     id: 'fsduifh',
     name: 'blue',

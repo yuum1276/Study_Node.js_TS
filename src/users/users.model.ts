@@ -1,39 +1,52 @@
 export type Users = {
   id: string;
-  name: string;
-  email: string;
+  nickname: string;
+  userId: string;
   password: string;
+  // createAt: Date;
+  // updateAt: Date;
 };
+
+// export class User {
+//   public readonly id!: string;
+//   public nickname!:string;
+//   public userId!:string;
+//   public password!:string;
+//   public readonly createAt!:Date;
+//   public readonly updateAt!: Date;
+// }
+
+// export default User;
 
 export const User: Users[] = [
   {
     id: 'fsduifh',
-    name: 'blue',
-    email: 'aaa@agadfafd',
+    nickname: 'blue',
+    userId: 'aaa@agadfafd',
     password: 'asdfadf',
   },
   {
-    id: 'iohf2309q4hr',
-    name: 'som',
-    email: 'aaa@adfadfdf',
+    id: 'fsduifh',
+    nickname: 'blue',
+    userId: 'aaa@agadfafd',
     password: 'asdfadf',
   },
   {
-    id: 'WE09tju2j',
-    name: 'lean',
-    email: 'ddd@agdfadf',
+    id: 'fsduifh',
+    nickname: 'blue',
+    userId: 'aaa@agadfafd',
     password: 'asdfadf',
   },
   {
-    id: 'asdfhj29009',
-    name: 'star',
-    email: 'cvv@afdafda',
+    id: 'fsduifh',
+    nickname: 'blue',
+    userId: 'aaa@agadfafd',
     password: 'asdfadf',
   },
   {
-    id: 'weju0fj20qj',
-    name: 'red',
-    email: 'adf@adfadf',
+    id: 'fsduifh',
+    nickname: 'blue',
+    userId: 'aaa@agadfafd',
     password: 'asdfadf',
   },
 ];

@@ -11,7 +11,7 @@ router.post('/signup', [
     express_validator_1.body('password').exists().isLength({ min: 10, max: 20 }),
 ], users_service_1.createUser);
 router.post('/login', [
-    express_validator_1.body('email').exists().isEmail(),
+    express_validator_1.body('email').exists().isEmail().withMessage('이메일을 입력해주세요!'),
     express_validator_1.body('password').exists().isLength({ min: 10, max: 20 }),
 ], users_service_1.login);
 router.get('/logout', users_service_1.logout);

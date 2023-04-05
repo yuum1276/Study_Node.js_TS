@@ -90,14 +90,14 @@ var getUser = function (req, res) {
 };
 exports.getUser = getUser;
 var createUser = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var _a, name, password, email, existingUser, newUser;
+    var _a, nickname, userId, password, existingUser, newUser;
     return __generator(this, function (_b) {
-        _a = req.body, name = _a.name, password = _a.password, email = _a.email;
-        existingUser = users.find(function (user) { return user.name === name; });
+        _a = req.body, nickname = _a.nickname, userId = _a.userId, password = _a.password;
+        existingUser = users.find(function (user) { return user.userId === userId; });
         if (existingUser) {
-            return [2, res.send('이미 사용중입니당dfd')];
+            return [2, res.send('이미 사용중입니당')];
         }
-        newUser = { id: uuid_1.v4(), name: name, password: password, email: email };
+        newUser = { id: uuid_1.v4(), nickname: nickname, password: password, userId: userId };
         users.push(newUser);
         console.log(newUser);
         return [2, res.send("\uD658\uC601\uD569\uB2C8\uB2F9\uD83D\uDE0A")];
@@ -105,11 +105,11 @@ var createUser = function (req, res) { return __awaiter(void 0, void 0, void 0, 
 }); };
 exports.createUser = createUser;
 var login = function (req, res) {
-    var _a = req.body, email = _a.email, password = _a.password;
-    if (!email || !password) {
+    var _a = req.body, userId = _a.userId, password = _a.password;
+    if (!userId || !password) {
         return res.status(400).send('이메일과 비밀번호를 입력해주세용');
     }
-    var user = users_model_1.User.find(function (user) { return user.email === email; });
+    var user = users_model_1.User.find(function (user) { return user.userId === userId; });
     if (!user) {
         return res.status(401).send('이메일을 확인해주세용');
     }
