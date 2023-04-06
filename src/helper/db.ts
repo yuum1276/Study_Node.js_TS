@@ -1,13 +1,26 @@
-import mysql from 'mysql2/promise';
+import * as mysql from 'mysql2/promise';
 
-const pool = mysql.createPool({
-  host: 'localhost',
-  user: 'root',
-  password: '0000',
-  database: 'node_ts',
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-});
+// Connections
+export async function dbConnection() {
+    let connection = await mysql.createConnection({
+        host: 'localhost',
+        user: 'root',
+        password: 'dbal3326@@'
+    });
 
-export default pool;
+    connection.connect()
+        .then(() => connection.query<mysql.RowDataPacket[]>('SELECT 1 + 1 AS solution'))
+        .then(([rows, fields]) => {
+            console.log('The solution is: ', rows[0]['solution']);
+        });
+
+    connection.connect()
+        .then(() => connection.execute<mysql.RowDataPacket[]>('SELECT 1 + 1 AS solution'))
+        .then(([rows, fields]) => {
+            console.log('The solution is: ', rows[0]['solution']);
+        });
+}
+
+dbConnection();
+
+export default dbConnection;

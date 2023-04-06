@@ -36,88 +36,162 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var express = require("express");
-var users_route_1 = require("./users/users.route");
-var post_route_1 = require("./posts/post.route");
+var express_1 = require("express");
 var mysql = require("mysql2/promise");
-var validationResult = require('express-validator').validationResult;
-var Server = (function () {
-    function Server() {
-        var app = express();
-        this.app = app;
-    }
-    Server.prototype.dbConnect = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var connection, _a, rows, fields, err_1;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0: return [4, mysql.createConnection({
-                            host: 'localhost',
-                            user: 'root',
-                            database: 'node_type',
-                        })];
-                    case 1:
-                        connection = _b.sent();
-                        _b.label = 2;
-                    case 2:
-                        _b.trys.push([2, 4, , 5]);
-                        return [4, connection.query('SELECT id, title, content FROM posts;')];
-                    case 3:
-                        _a = _b.sent(), rows = _a[0], fields = _a[1];
-                        rows.forEach(function (row) {
-                            console.log('id: ', row.id, 'title', row.title, 'content: ', row.content);
+function main() {
+    return __awaiter(this, void 0, void 0, function () {
+        var conn, app, port;
+        var _this = this;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4, mysql.createConnection({
+                        host: 'localhost',
+                        user: 'root',
+                        database: 'node_ts',
+                    })];
+                case 1:
+                    conn = _a.sent();
+                    app = express_1.default();
+                    port = 3000;
+                    app.use(function (err, req, res, next) {
+                        console.error(err.stack);
+                        res.status(500).send('Something went wrong!');
+                    });
+                    app.use(express_1.default.json());
+                    app.use(express_1.default.urlencoded({ extended: false }));
+                    app.get('/users', function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
+                        var rows, err_1;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    _a.trys.push([0, 2, , 3]);
+                                    return [4, conn.query("SELECT * FROM users")];
+                                case 1:
+                                    rows = _a.sent();
+                                    console.log(rows);
+                                    res.send(rows);
+                                    return [3, 3];
+                                case 2:
+                                    err_1 = _a.sent();
+                                    console.log(err_1);
+                                    next(err_1);
+                                    return [3, 3];
+                                case 3: return [2];
+                            }
                         });
-                        fields.forEach(function (field) {
-                            console.log('table: ', field.table);
+                    }); });
+                    app.get('/users/:id', function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
+                        var email, rows, err_2;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    email = req.params.email;
+                                    _a.label = 1;
+                                case 1:
+                                    _a.trys.push([1, 3, , 4]);
+                                    return [4, conn.query('SELECT email FROM users WHERE `email` = ?', [email])];
+                                case 2:
+                                    rows = _a.sent();
+                                    if (rows === null) {
+                                        return [2, res.status(404).send('User not found')];
+                                    }
+                                    res.send(rows);
+                                    return [3, 4];
+                                case 3:
+                                    err_2 = _a.sent();
+                                    next(err_2);
+                                    return [3, 4];
+                                case 4: return [2];
+                            }
                         });
-                        return [3, 5];
-                    case 4:
-                        err_1 = _b.sent();
-                        throw err_1;
-                    case 5: return [2];
-                }
-            });
-        });
-    };
-    Server.prototype.setRoute = function () {
-        this.app.use(users_route_1.default);
-        this.app.use(post_route_1.default);
-    };
-    Server.prototype.setMiddleware = function () {
-        var app = express();
-        this.app.use(function (req, res, next) {
-            console.log(req.rawHeaders[1]);
-            console.log('this is logging middleware');
-            next();
-        });
-        this.app.use(express.json());
-        this.app.use(express.urlencoded({ extended: false }));
-        this.setRoute();
-        this.app.use(function (req, res, next) {
-            var errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                return res.status(400).json({ errors: errors.array() });
+                    }); });
+                    app.post('/signup', function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
+                        var _a, email, password, result, user, err_3;
+                        return __generator(this, function (_b) {
+                            switch (_b.label) {
+                                case 0:
+                                    _b.trys.push([0, 2, , 3]);
+                                    _a = req.params, email = _a.email, password = _a.password;
+                                    return [4, conn.query('INSERT INTO `users` (`email`, `password`) VALUES (?, ?)', [email, password])];
+                                case 1:
+                                    result = _b.sent();
+                                    user = {
+                                        email: email,
+                                        password: password
+                                    };
+                                    return [2, user];
+                                case 2:
+                                    err_3 = _b.sent();
+                                    console.log(err_3);
+                                    return [2, (err_3)];
+                                case 3: return [2];
+                            }
+                        });
+                    }); });
+                    app.post('/login', function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
+                        var _a, email, password, rows;
+                        return __generator(this, function (_b) {
+                            switch (_b.label) {
+                                case 0:
+                                    _a = req.params, email = _a.email, password = _a.password;
+                                    return [4, conn.query('SELECT * FROM `users` WHERE `email` = ?', [email])];
+                                case 1:
+                                    rows = _b.sent();
+                                    return [2];
+                            }
+                        });
+                    }); });
+                    app.get('/posts', function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
+                        var rows, err_4;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    _a.trys.push([0, 2, , 3]);
+                                    return [4, conn.query('SELECT id, title, content, created_at, updated_at FROM posts')];
+                                case 1:
+                                    rows = _a.sent();
+                                    res.send(rows);
+                                    return [3, 3];
+                                case 2:
+                                    err_4 = _a.sent();
+                                    next(err_4);
+                                    return [3, 3];
+                                case 3: return [2];
+                            }
+                        });
+                    }); });
+                    app.get('/posts/:id', function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
+                        var id, rows, err_5;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    id = req.params.id;
+                                    _a.label = 1;
+                                case 1:
+                                    _a.trys.push([1, 3, , 4]);
+                                    return [4, conn.query('SELECT id, title, content, created_at, updated_at FROM posts WHERE id = ?', [id])];
+                                case 2:
+                                    rows = _a.sent();
+                                    if (rows === null) {
+                                        return [2, res.status(404).send('Post not found')];
+                                    }
+                                    res.send(rows);
+                                    return [3, 4];
+                                case 3:
+                                    err_5 = _a.sent();
+                                    next(err_5);
+                                    return [3, 4];
+                                case 4: return [2];
+                            }
+                        });
+                    }); });
+                    app.listen(port, function () {
+                        console.log("Server running on port " + port);
+                    });
+                    return [2];
             }
-            next();
         });
-        this.app.use(function (req, res, next) {
-            console.log('This is error middleware');
-            res.send({ error: '404 not found error' });
-        });
-    };
-    Server.prototype.listen = function () {
-        var port = 8000;
-        this.setMiddleware();
-        this.dbConnect();
-        this.app.listen(port, function () {
-            console.log("App listening at http://localhost:" + port);
-        });
-    };
-    return Server;
-}());
-function init() {
-    var server = new Server();
-    server.listen();
+    });
 }
-init();
+main();
 //# sourceMappingURL=app.js.map

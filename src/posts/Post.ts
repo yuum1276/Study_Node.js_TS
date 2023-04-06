@@ -1,6 +1,6 @@
-import db from '../helper/db';
+import { RowDataPacket, FieldPacket } from 'mysql2/promise';
 
-interface Post {
+export interface IPost extends RowDataPacket {
   id: number;
   title: string;
   content: string;
@@ -11,11 +11,14 @@ interface Post {
 class Post {
   // static async create(title: string, content: string): Promise<Post> {
   //     const [result] = await db.query('INSERT INTO `post` (`title`, `content`) VALUES (?, ?)', [title, content]);
-  //     const [rows] = await db.query('SELECT * FROM `post` WHERE `id` = ?', [result.insertId]);
+  //     const [rows]:[IPost[], FieldPacket[]] = await db.query('SELECT * FROM `post` WHERE `id` = ?', [result.id]);
   //     const post = rows[0] as Post;
   //     return post;
   // }
   // static async findAll(): Promise<Post[]> {
-  //     const [rows] = await db.query()
+  //     const [rows] = //await db.query()
+  //     return rows;
   // }
 }
+
+export default Post;
