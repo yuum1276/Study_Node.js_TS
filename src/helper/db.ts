@@ -13,12 +13,6 @@ export async function dbConnection() {
         .then(([rows, fields]) => {
             console.log('The solution is: ', rows[0]['solution']);
         });
-
-    connection.connect()
-        .then(() => connection.execute<mysql.RowDataPacket[]>('SELECT 1 + 1 AS solution'))
-        .then(([rows, fields]) => {
-            console.log('The solution is: ', rows[0]['solution']);
-        });
 }
 
 dbConnection();
