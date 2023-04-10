@@ -1,18 +1,11 @@
 import express, { Request, Response, NextFunction } from 'express';
-import mysql, { FieldPacket, RowDataPacket } from 'mysql2/promise';
-import Post, { IPost } from 'posts/Post';
+import { FieldPacket } from 'mysql2/promise';
+import { IPost } from 'posts/Post';
 import IUser from 'users/User';
+import { pool } from './helper/db';
 
 const app = express();
 const port = 8000;
-
-const poolConfig = {
-  connectionLimit: 10,
-  host: 'localhost',
-  user: 'root',
-  password: 'dbal3326@@',
-  database: 'node_post',
-};
 
 interface Token {
   email: string;
@@ -23,8 +16,6 @@ let token: Token = {
   email: '',
   token: '',
 };
-
-let pool = mysql.createPool(poolConfig);
 
 // Middleware to handle errors
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
@@ -38,7 +29,8 @@ app.use(express.urlencoded({ extended: false }));
 // User routes
 app.get('/users', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const rows = await pool.query(`SELECT * FROM users`);
+    const connection = await pool.getConnection();
+    const rows = await connection.query(`SELECT * FROM users`);
     console.log(rows);
     res.send(rows);
   } catch (err) {

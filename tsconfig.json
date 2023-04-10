@@ -13,7 +13,8 @@
     "baseUrl": "./src",
     "incremental": true,
     "skipLibCheck": true,
-    "esModuleInterop": true,
+    "esModuleInterop": true
   },
-  "include": ["src/**/*", "dist/app.model.ts"]
+  "include": ["src/**/*", "dist/app.model.ts"],
+  "exclude": ["node_modules"]
 }

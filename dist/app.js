@@ -40,21 +40,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = __importDefault(require("express"));
-var promise_1 = __importDefault(require("mysql2/promise"));
+var db_1 = require("./helper/db");
 var app = express_1.default();
 var port = 8000;
-var poolConfig = {
-    connectionLimit: 10,
-    host: 'localhost',
-    user: 'root',
-    password: 'dbal3326@@',
-    database: 'node_post'
-};
 var token = {
-    email: "",
-    token: ""
+    email: '',
+    token: '',
 };
-var pool = promise_1.default.createPool(poolConfig);
 app.use(function (err, req, res, next) {
     console.error(err.stack);
     res.status(500).send('Something went wrong!');
@@ -62,23 +54,26 @@ app.use(function (err, req, res, next) {
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: false }));
 app.get('/users', function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var rows, err_1;
+    var connection, rows, err_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                _a.trys.push([0, 2, , 3]);
-                return [4, pool.query("SELECT * FROM users")];
+                _a.trys.push([0, 3, , 4]);
+                return [4, db_1.pool.getConnection()];
             case 1:
+                connection = _a.sent();
+                return [4, connection.query("SELECT * FROM users")];
+            case 2:
                 rows = _a.sent();
                 console.log(rows);
                 res.send(rows);
-                return [3, 3];
-            case 2:
+                return [3, 4];
+            case 3:
                 err_1 = _a.sent();
                 console.log(err_1);
                 next(err_1);
-                return [3, 3];
-            case 3: return [2];
+                return [3, 4];
+            case 4: return [2];
         }
     });
 }); });
@@ -88,7 +83,7 @@ app.get('/users/:id', function (req, res, next) { return __awaiter(void 0, void 
         switch (_a.label) {
             case 0:
                 id = req.params.id;
-                return [4, pool.getConnection()];
+                return [4, db_1.pool.getConnection()];
             case 1:
                 connection = _a.sent();
                 _a.label = 2;
@@ -117,7 +112,7 @@ app.post('/join', function (req, res, next) { return __awaiter(void 0, void 0, v
         switch (_a.label) {
             case 0:
                 data = req.body;
-                return [4, pool.getConnection()];
+                return [4, db_1.pool.getConnection()];
             case 1:
                 connection = _a.sent();
                 _a.label = 2;
@@ -133,13 +128,13 @@ app.post('/join', function (req, res, next) { return __awaiter(void 0, void 0, v
             case 4:
                 result = _a.sent();
                 res.send({
-                    message: data.nick + " \uD68C\uC6D0\uAC00\uC785 \uC131\uACF5! "
+                    message: data.nick + " \uD68C\uC6D0\uAC00\uC785 \uC131\uACF5! ",
                 });
                 return [3, 6];
             case 5:
                 err_3 = _a.sent();
                 console.log(err_3);
-                return [2, (err_3)];
+                return [2, err_3];
             case 6: return [2];
         }
     });
@@ -150,7 +145,7 @@ app.post('/login', function (req, res, next) { return __awaiter(void 0, void 0, 
         switch (_a.label) {
             case 0:
                 data = req.body;
-                return [4, pool.getConnection()];
+                return [4, db_1.pool.getConnection()];
             case 1:
                 connection = _a.sent();
                 return [4, connection.query('SELECT * FROM `users` WHERE `email` = ?', [data.email])];
@@ -162,12 +157,12 @@ app.post('/login', function (req, res, next) { return __awaiter(void 0, void 0, 
                     token.token = 'asdf';
                     res.send({
                         message: '로그인 성공!',
-                        token: token.token
+                        token: token.token,
                     });
                 }
                 else {
                     res.send({
-                        message: '로그인 실패'
+                        message: '로그인 실패',
                     });
                 }
                 return [4, next()];
@@ -181,7 +176,7 @@ app.get('/posts', function (req, res, next) { return __awaiter(void 0, void 0, v
     var connection, rows, err_4;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0: return [4, pool.getConnection()];
+            case 0: return [4, db_1.pool.getConnection()];
             case 1:
                 connection = _a.sent();
                 _a.label = 2;
@@ -200,7 +195,7 @@ app.get('/posts', function (req, res, next) { return __awaiter(void 0, void 0, v
         }
     });
 }); });
-app.post('/uploadPost', function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+app.post('/createPost', function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
     var data, connection, rows, result, err_5;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -210,12 +205,12 @@ app.post('/uploadPost', function (req, res, next) { return __awaiter(void 0, voi
                 _a.label = 1;
             case 1:
                 _a.trys.push([1, 9, , 10]);
-                if (data.token === "") {
+                if (data.token === '') {
                     res.send({
-                        message: "로그인 후 사용가능!"
+                        message: '로그인 후 사용가능!',
                     });
                 }
-                return [4, pool.getConnection()];
+                return [4, db_1.pool.getConnection()];
             case 2:
                 connection = _a.sent();
                 return [4, connection.query('SELECT * FROM `users` WHERE `email` = ?', [data.email])];
@@ -231,11 +226,11 @@ app.post('/uploadPost', function (req, res, next) { return __awaiter(void 0, voi
                 console.log(result[0]);
                 return [2, res.send(result[0])];
             case 5: return [2, res.send({
-                    message: '로그인 후 이용해주세용'
+                    message: '로그인 후 이용해주세용',
                 })];
             case 6: return [3, 8];
             case 7: return [2, res.send({
-                    message: '로그인 후 이용해주세용'
+                    message: '로그인 후 이용해주세용',
                 })];
             case 8: return [3, 10];
             case 9:
@@ -246,13 +241,116 @@ app.post('/uploadPost', function (req, res, next) { return __awaiter(void 0, voi
         }
     });
 }); });
-app.get('/posts/:id', function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var id, connection, rows, err_6;
+app.put('/posts/:id', function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    var id, data, connection, rows, result, err_6;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 id = req.params.id;
-                return [4, pool.getConnection()];
+                data = req.body;
+                console.log(data);
+                _a.label = 1;
+            case 1:
+                _a.trys.push([1, 9, , 10]);
+                if (data.token === '') {
+                    res.send({
+                        message: '로그인 후 사용가능!',
+                    });
+                }
+                return [4, db_1.pool.getConnection()];
+            case 2:
+                connection = _a.sent();
+                return [4, connection.query('SELECT * FROM `users` WHERE `email` = ?', [data.email])];
+            case 3:
+                rows = (_a.sent())[0];
+                console.log(rows);
+                if (!(rows !== null)) return [3, 8];
+                if (!(token.email === data.email)) return [3, 7];
+                if (!(token.token === data.token)) return [3, 5];
+                if (!data.title || !data.content) {
+                    return [2, res.send('제목, 내용은 필수!')];
+                }
+                return [4, connection.query('UPDATE posts SET title = ?, content = ? WHERE id = ?', [data.title, data.content, id])];
+            case 4:
+                result = (_a.sent())[0];
+                if (result === null) {
+                    return [2, res.status(404).send('작성된 글이 없음!')];
+                }
+                res.send('수정 완료!');
+                return [3, 6];
+            case 5: return [2, res.send({
+                    message: '로그인 후 사용가능!',
+                })];
+            case 6: return [3, 8];
+            case 7: return [2, res.send({
+                    message: '로그인 후 사용가능!',
+                })];
+            case 8: return [3, 10];
+            case 9:
+                err_6 = _a.sent();
+                next(err_6);
+                return [3, 10];
+            case 10: return [2];
+        }
+    });
+}); });
+app.delete('/posts/:id', function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    var id, data, connection, rows, result, err_7;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                id = req.params.id;
+                data = req.body;
+                console.log(data);
+                _a.label = 1;
+            case 1:
+                _a.trys.push([1, 9, , 10]);
+                if (data.token === '') {
+                    res.send({
+                        message: '로그인 후 사용가능!',
+                    });
+                }
+                return [4, db_1.pool.getConnection()];
+            case 2:
+                connection = _a.sent();
+                return [4, connection.query('SELECT * FROM `users` WHERE `email` = ?', [data.email])];
+            case 3:
+                rows = (_a.sent())[0];
+                console.log(rows);
+                if (!(rows !== null)) return [3, 8];
+                if (!(token.email === data.email)) return [3, 7];
+                if (!(token.token === data.token)) return [3, 5];
+                return [4, connection.query('DELETE FROM posts WHERE id = ?', [id])];
+            case 4:
+                result = (_a.sent())[0];
+                if (result === null) {
+                    return [2, res.send('작성된 글이 없음!')];
+                }
+                res.send('삭제 성공!');
+                return [3, 6];
+            case 5: return [2, res.send({
+                    message: '로그인 후 사용가능!',
+                })];
+            case 6: return [3, 8];
+            case 7: return [2, res.send({
+                    message: '로그인 후 사용가능!',
+                })];
+            case 8: return [3, 10];
+            case 9:
+                err_7 = _a.sent();
+                next(err_7);
+                return [3, 10];
+            case 10: return [2];
+        }
+    });
+}); });
+app.get('/posts/:id', function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    var id, connection, rows, err_8;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                id = req.params.id;
+                return [4, db_1.pool.getConnection()];
             case 1:
                 connection = _a.sent();
                 _a.label = 2;
@@ -267,8 +365,8 @@ app.get('/posts/:id', function (req, res, next) { return __awaiter(void 0, void 
                 res.send(rows);
                 return [3, 5];
             case 4:
-                err_6 = _a.sent();
-                next(err_6);
+                err_8 = _a.sent();
+                next(err_8);
                 return [3, 5];
             case 5: return [2];
         }
