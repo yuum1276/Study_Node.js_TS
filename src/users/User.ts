@@ -1,12 +1,13 @@
-import { FieldPacket, RowDataPacket } from 'mysql2';
+import { RowDataPacket } from 'mysql2';
 
 export interface IUser extends RowDataPacket {
   // id: number;
   email: string;
+  nick: string;
   password: string;
 }
 
-class User {
+//class User {
   // static async findOneByEmail(email: string): Promise<User | null> {
   //   const rows = await db.query('SELECT * FROM `users` WHERE `email` = ?', [
   //     email
@@ -39,6 +40,6 @@ class User {
   //   }
   //   return null;
   // }
-}
+//}
 
-export default User;
+export default IUser;
