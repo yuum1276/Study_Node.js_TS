@@ -153,13 +153,13 @@ app.post('/uploadPost', async (req: Request, res: Response, next:NextFunction) =
 
       if(token.token === data.token){
 
-        const result = await connection.query(
-          'INSERT INTO `posts` (`title`, `content`,`email`, `createAt`) VALUES (?, ?, ?, ?)',
-          [data.title, data.content, data.email, data.createdAt]
+        const [result]:[IPost[], FieldPacket[]] = await connection.query(
+          'INSERT INTO `posts` (`title`, `content`,`email`) VALUES (?, ?, ?)',
+          [data.title, data.content, data.email]
         )
 
-        console.log(result);
-        return res.send(result)
+        console.log(result[0]);
+        return res.send(result[0])
       } else {
         return res.send({
           message: '로그인 후 이용해주세용'

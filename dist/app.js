@@ -225,11 +225,11 @@ app.post('/uploadPost', function (req, res, next) { return __awaiter(void 0, voi
                 if (!(rows !== null)) return [3, 8];
                 if (!(token.email === data.email)) return [3, 7];
                 if (!(token.token === data.token)) return [3, 5];
-                return [4, connection.query('INSERT INTO `posts` (`title`, `content`,`email`, `createAt`) VALUES (?, ?, ?, ?)', [data.title, data.content, data.email, data.createdAt])];
+                return [4, connection.query('INSERT INTO `posts` (`title`, `content`,`email`) VALUES (?, ?, ?)', [data.title, data.content, data.email])];
             case 4:
-                result = _a.sent();
-                console.log(result);
-                return [2, res.send(result)];
+                result = (_a.sent())[0];
+                console.log(result[0]);
+                return [2, res.send(result[0])];
             case 5: return [2, res.send({
                     message: '로그인 후 이용해주세용'
                 })];

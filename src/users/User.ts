@@ -1,10 +1,11 @@
 import { RowDataPacket } from 'mysql2';
 
 export interface IUser extends RowDataPacket {
-  // id: number;
+  id: number;
   email: string;
   nick: string;
   password: string;
+  token: string;
 }
 
 //class User {
