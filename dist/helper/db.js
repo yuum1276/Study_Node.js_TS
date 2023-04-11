@@ -8,7 +8,7 @@ var promise_1 = __importDefault(require("mysql2/promise"));
 exports.pool = promise_1.default.createPool({
     host: 'localhost',
     user: 'root',
-    password: '0000',
+    password: 'dbal3326@@',
     database: 'node_post',
 });
 //# sourceMappingURL=db.js.map

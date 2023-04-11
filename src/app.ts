@@ -1,7 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import { FieldPacket } from 'mysql2/promise';
-import { IPost } from 'posts/Post';
-import IUser from 'users/User';
+import { IPost } from './posts/Post';
+import IUser from './users/User';
 import { pool } from './helper/db';
 
 const app = express();
@@ -12,7 +12,7 @@ interface Token {
   token: string;
 }
 
-let token: Token = {
+let tokenInfo: Token = {
   email: '',
   token: '',
 };
@@ -27,6 +27,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 // User routes
+// GET /users
 app.get('/users', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const connection = await pool.getConnection();
@@ -39,6 +40,7 @@ app.get('/users', async (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
+// GET /users/:id
 app.get(
   '/users/:id',
   async (req: Request, res: Response, next: NextFunction) => {
@@ -61,7 +63,8 @@ app.get(
   }
 );
 
-app.post('/join', async (req: Request, res: Response, next: NextFunction) => {
+// POST /users/join
+app.post('/users/join', async (req: Request, res: Response, next: NextFunction) => {
   const data = <IUser>req.body;
   const connection = await pool.getConnection();
 
@@ -70,39 +73,44 @@ app.post('/join', async (req: Request, res: Response, next: NextFunction) => {
       'SELECT * FROM `users` WHERE `email` = ?',
       [data.email]
     );
-    if (rows === null) {
+    console.log(rows);
+    
+    if (rows.length > 0) {
+    
       res.send({ message: '사용중인 이멜이에용' });
+    } else {
+      const [result] = await connection.query(
+        'INSERT INTO `users` (`email`, `nick`,`password`) VALUES (?, ?, ?)',
+        [data.email, data.nick, data.password]
+      );
+      res.send({
+        message: `${data.nick} 회원가입 성공! `,
+      });
     }
-    const result = await connection.query(
-      'INSERT INTO `users` (`email`, `nick`,`password`) VALUES (?, ?, ?)',
-      [data.email, data.nick, data.password]
-    );
-    res.send({
-      message: `${data.nick} 회원가입 성공! `,
-    });
   } catch (err) {
     console.log(err);
     return err;
   }
 });
 
-app.post('/login', async (req: Request, res: Response, next: NextFunction) => {
+// POST /users/login
+app.post('/users/login', async (req: Request, res: Response, next: NextFunction) => {
   const data = <IUser>req.body;
 
   const connection = await pool.getConnection();
 
   const [rows]: [IUser[], FieldPacket[]] = await connection.query(
-    'SELECT * FROM `users` WHERE `email` = ?',
-    [data.email]
+    'SELECT email FROM `users` WHERE `email` = ? AND `password` = ?',
+    [data.email, data.password]
   );
   console.log(rows);
 
   if (rows.length > 0) {
-    token.email = data.email;
-    token.token = 'asdf';
+    tokenInfo.email = data.email;
+    tokenInfo.token = 'asdf';
     res.send({
       message: '로그인 성공!',
-      token: token.token,
+      token: tokenInfo.token,
     });
   } else {
     res.send({
@@ -113,6 +121,7 @@ app.post('/login', async (req: Request, res: Response, next: NextFunction) => {
 });
 
 // Post routes
+// GET /posts
 app.get('/posts', async (req: Request, res: Response, next: NextFunction) => {
   const connection = await pool.getConnection();
 
@@ -124,8 +133,9 @@ app.get('/posts', async (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
+// POST /posts/create
 app.post(
-  '/createPost',
+  '/posts/create',
   async (req: Request, res: Response, next: NextFunction) => {
     const data = <IPost>req.body;
     console.log(data);
@@ -143,15 +153,19 @@ app.post(
       console.log(rows);
 
       if (rows !== null) {
-        if (token.email === data.email) {
-          if (token.token === data.token) {
-            const [result]: [IPost[], FieldPacket[]] = await connection.query(
+        if (tokenInfo.email === data.email) {
+          if (tokenInfo.token === data.token) {
+            const [result]:[IPost[], FieldPacket[]] = await connection.query(
               'INSERT INTO `posts` (`title`, `content`,`email`) VALUES (?, ?, ?)',
               [data.title, data.content, data.email]
             );
-
-            console.log(result[0]);
-            return res.send(result[0]);
+              console.log(result);
+              return res.send({
+                title: data.title,
+                content: data.content,
+                email: data.email,
+                createAt: data.createdAt
+              });
           } else {
             return res.send({
               message: '로그인 후 이용해주세용',
@@ -169,58 +183,72 @@ app.post(
   }
 );
 
-app.put(
-  '/posts/:id',
+app.put('/posts/:id',
   async (req: Request, res: Response, next: NextFunction) => {
-    const { id } = req.params;
+
+    const {id} = req.params;
     const data = <IPost>req.body;
     console.log(data);
-    try {
+
       if (data.token === '') {
         res.send({
           message: '로그인 후 사용가능!',
         });
       }
-      const connection = await pool.getConnection();
-      const [rows]: [IUser[], FieldPacket[]] = await connection.query(
-        'SELECT * FROM `users` WHERE `email` = ?',
-        [data.email]
-      );
-      console.log(rows);
 
-      if (rows !== null) {
-        if (token.email === data.email) {
-          if (token.token === data.token) {
+      const connection = await pool.getConnection();
+
+      const [rows]: [IUser[], FieldPacket[]] = await connection.query(
+        'SELECT id FROM `posts` WHERE `email` = ? AND `id` = ? ',
+        [data.email, id]
+      ).catch(err => {
+        console.log(err);
+        return err
+      })
+
+      // console.log("rows" + rows[0].id);
+
+      if (!rows[0]) {
+        console.log('id' + id);
+        res.send('작성된 글이 없음!') 
+
+      } else {
+
+        if (tokenInfo.email === data.email) {
+
+          if (tokenInfo.token === data.token) {
+
             if (!data.title || !data.content) {
               return res.send('제목, 내용은 필수!');
             }
 
             const [result] = await connection.query(
-              'UPDATE posts SET title = ?, content = ? WHERE id = ?',
-              [data.title, data.content, id]
-            );
+              'UPDATE posts SET title = ?, content = ? WHERE id = ? AND email = ?',
+              [data.title, data.content, id, data.email]
+            )
 
-            if (result === null) {
-              return res.status(404).send('작성된 글이 없음!');
-            }
+            // if (result === null) {
+
+            //   return res.send('작성된 글이 없음!');
+            // }
 
             res.send('수정 완료!');
-          } else {
+            } else {
+
             return res.send({
               message: '로그인 후 사용가능!',
             });
+
           }
+          
         } else {
+
           return res.send({
             message: '로그인 후 사용가능!',
           });
         }
-      }
-    } catch (err) {
-      next(err);
     }
-  }
-);
+});
 
 app.delete(
   '/posts/:id',
@@ -236,14 +264,14 @@ app.delete(
       }
       const connection = await pool.getConnection();
       const [rows]: [IUser[], FieldPacket[]] = await connection.query(
-        'SELECT * FROM `users` WHERE `email` = ?',
-        [data.email]
+        'SELECT * FROM `posts` WHERE `email` = ? AND `id` = ?',
+        [data.email, id]
       );
       console.log(rows);
 
-      if (rows !== null) {
-        if (token.email === data.email) {
-          if (token.token === data.token) {
+      if (!rows[0]) {
+        if (tokenInfo.email === data.email) {
+          if (tokenInfo.token === data.token) {
             const [result] = await connection.query(
               'DELETE FROM posts WHERE id = ?',
               [id]
@@ -278,7 +306,7 @@ app.get(
 
     try {
       const [rows] = await connection.query(
-        'SELECT id, title, content, created_at, updated_at FROM posts WHERE id = ?',
+        'SELECT id, title, content, createdAt, updatedAt FROM posts WHERE id = ?',
         [id]
       );
       if (rows === null) {

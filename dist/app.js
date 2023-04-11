@@ -43,7 +43,7 @@ var express_1 = __importDefault(require("express"));
 var db_1 = require("./helper/db");
 var app = express_1.default();
 var port = 8000;
-var token = {
+var tokenInfo = {
     email: '',
     token: '',
 };
@@ -106,7 +106,7 @@ app.get('/users/:id', function (req, res, next) { return __awaiter(void 0, void 
         }
     });
 }); });
-app.post('/join', function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+app.post('/users/join', function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
     var data, connection, rows, result, err_3;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -117,29 +117,31 @@ app.post('/join', function (req, res, next) { return __awaiter(void 0, void 0, v
                 connection = _a.sent();
                 _a.label = 2;
             case 2:
-                _a.trys.push([2, 5, , 6]);
+                _a.trys.push([2, 7, , 8]);
                 return [4, connection.query('SELECT * FROM `users` WHERE `email` = ?', [data.email])];
             case 3:
                 rows = (_a.sent())[0];
-                if (rows === null) {
-                    res.send({ message: '사용중인 이멜이에용' });
-                }
-                return [4, connection.query('INSERT INTO `users` (`email`, `nick`,`password`) VALUES (?, ?, ?)', [data.email, data.nick, data.password])];
-            case 4:
-                result = _a.sent();
+                console.log(rows);
+                if (!(rows.length > 0)) return [3, 4];
+                res.send({ message: '사용중인 이멜이에용' });
+                return [3, 6];
+            case 4: return [4, connection.query('INSERT INTO `users` (`email`, `nick`,`password`) VALUES (?, ?, ?)', [data.email, data.nick, data.password])];
+            case 5:
+                result = (_a.sent())[0];
                 res.send({
                     message: data.nick + " \uD68C\uC6D0\uAC00\uC785 \uC131\uACF5! ",
                 });
-                return [3, 6];
-            case 5:
+                _a.label = 6;
+            case 6: return [3, 8];
+            case 7:
                 err_3 = _a.sent();
                 console.log(err_3);
                 return [2, err_3];
-            case 6: return [2];
+            case 8: return [2];
         }
     });
 }); });
-app.post('/login', function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+app.post('/users/login', function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
     var data, connection, rows;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -148,16 +150,16 @@ app.post('/login', function (req, res, next) { return __awaiter(void 0, void 0, 
                 return [4, db_1.pool.getConnection()];
             case 1:
                 connection = _a.sent();
-                return [4, connection.query('SELECT * FROM `users` WHERE `email` = ?', [data.email])];
+                return [4, connection.query('SELECT email FROM `users` WHERE `email` = ? AND `password` = ?', [data.email, data.password])];
             case 2:
                 rows = (_a.sent())[0];
                 console.log(rows);
                 if (rows.length > 0) {
-                    token.email = data.email;
-                    token.token = 'asdf';
+                    tokenInfo.email = data.email;
+                    tokenInfo.token = 'asdf';
                     res.send({
                         message: '로그인 성공!',
-                        token: token.token,
+                        token: tokenInfo.token,
                     });
                 }
                 else {
@@ -195,7 +197,7 @@ app.get('/posts', function (req, res, next) { return __awaiter(void 0, void 0, v
         }
     });
 }); });
-app.post('/createPost', function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+app.post('/posts/create', function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
     var data, connection, rows, result, err_5;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -218,13 +220,18 @@ app.post('/createPost', function (req, res, next) { return __awaiter(void 0, voi
                 rows = (_a.sent())[0];
                 console.log(rows);
                 if (!(rows !== null)) return [3, 8];
-                if (!(token.email === data.email)) return [3, 7];
-                if (!(token.token === data.token)) return [3, 5];
+                if (!(tokenInfo.email === data.email)) return [3, 7];
+                if (!(tokenInfo.token === data.token)) return [3, 5];
                 return [4, connection.query('INSERT INTO `posts` (`title`, `content`,`email`) VALUES (?, ?, ?)', [data.title, data.content, data.email])];
             case 4:
                 result = (_a.sent())[0];
-                console.log(result[0]);
-                return [2, res.send(result[0])];
+                console.log(result);
+                return [2, res.send({
+                        title: data.title,
+                        content: data.content,
+                        email: data.email,
+                        createAt: data.createdAt
+                    })];
             case 5: return [2, res.send({
                     message: '로그인 후 이용해주세용',
                 })];
@@ -242,6 +249,54 @@ app.post('/createPost', function (req, res, next) { return __awaiter(void 0, voi
     });
 }); });
 app.put('/posts/:id', function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    var id, data, connection, rows, result;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                id = req.params.id;
+                data = req.body;
+                console.log(data);
+                if (data.token === '') {
+                    res.send({
+                        message: '로그인 후 사용가능!',
+                    });
+                }
+                return [4, db_1.pool.getConnection()];
+            case 1:
+                connection = _a.sent();
+                return [4, connection.query('SELECT id FROM `posts` WHERE `email` = ? AND `id` = ? ', [data.email, id]).catch(function (err) {
+                        console.log(err);
+                        return err;
+                    })];
+            case 2:
+                rows = (_a.sent())[0];
+                if (!!rows[0]) return [3, 3];
+                console.log('id' + id);
+                res.send('작성된 글이 없음!');
+                return [3, 8];
+            case 3:
+                if (!(tokenInfo.email === data.email)) return [3, 7];
+                if (!(tokenInfo.token === data.token)) return [3, 5];
+                if (!data.title || !data.content) {
+                    return [2, res.send('제목, 내용은 필수!')];
+                }
+                return [4, connection.query('UPDATE posts SET title = ?, content = ? WHERE id = ? AND email = ?', [data.title, data.content, id, data.email])];
+            case 4:
+                result = (_a.sent())[0];
+                res.send('수정 완료!');
+                return [3, 6];
+            case 5: return [2, res.send({
+                    message: '로그인 후 사용가능!',
+                })];
+            case 6: return [3, 8];
+            case 7: return [2, res.send({
+                    message: '로그인 후 사용가능!',
+                })];
+            case 8: return [2];
+        }
+    });
+}); });
+app.delete('/posts/:id', function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
     var id, data, connection, rows, result, err_6;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -260,66 +315,13 @@ app.put('/posts/:id', function (req, res, next) { return __awaiter(void 0, void 
                 return [4, db_1.pool.getConnection()];
             case 2:
                 connection = _a.sent();
-                return [4, connection.query('SELECT * FROM `users` WHERE `email` = ?', [data.email])];
+                return [4, connection.query('SELECT * FROM `posts` WHERE `email` = ? AND `id` = ?', [data.email, id])];
             case 3:
                 rows = (_a.sent())[0];
                 console.log(rows);
-                if (!(rows !== null)) return [3, 8];
-                if (!(token.email === data.email)) return [3, 7];
-                if (!(token.token === data.token)) return [3, 5];
-                if (!data.title || !data.content) {
-                    return [2, res.send('제목, 내용은 필수!')];
-                }
-                return [4, connection.query('UPDATE posts SET title = ?, content = ? WHERE id = ?', [data.title, data.content, id])];
-            case 4:
-                result = (_a.sent())[0];
-                if (result === null) {
-                    return [2, res.status(404).send('작성된 글이 없음!')];
-                }
-                res.send('수정 완료!');
-                return [3, 6];
-            case 5: return [2, res.send({
-                    message: '로그인 후 사용가능!',
-                })];
-            case 6: return [3, 8];
-            case 7: return [2, res.send({
-                    message: '로그인 후 사용가능!',
-                })];
-            case 8: return [3, 10];
-            case 9:
-                err_6 = _a.sent();
-                next(err_6);
-                return [3, 10];
-            case 10: return [2];
-        }
-    });
-}); });
-app.delete('/posts/:id', function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var id, data, connection, rows, result, err_7;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                id = req.params.id;
-                data = req.body;
-                console.log(data);
-                _a.label = 1;
-            case 1:
-                _a.trys.push([1, 9, , 10]);
-                if (data.token === '') {
-                    res.send({
-                        message: '로그인 후 사용가능!',
-                    });
-                }
-                return [4, db_1.pool.getConnection()];
-            case 2:
-                connection = _a.sent();
-                return [4, connection.query('SELECT * FROM `users` WHERE `email` = ?', [data.email])];
-            case 3:
-                rows = (_a.sent())[0];
-                console.log(rows);
-                if (!(rows !== null)) return [3, 8];
-                if (!(token.email === data.email)) return [3, 7];
-                if (!(token.token === data.token)) return [3, 5];
+                if (!!rows[0]) return [3, 8];
+                if (!(tokenInfo.email === data.email)) return [3, 7];
+                if (!(tokenInfo.token === data.token)) return [3, 5];
                 return [4, connection.query('DELETE FROM posts WHERE id = ?', [id])];
             case 4:
                 result = (_a.sent())[0];
@@ -337,15 +339,15 @@ app.delete('/posts/:id', function (req, res, next) { return __awaiter(void 0, vo
                 })];
             case 8: return [3, 10];
             case 9:
-                err_7 = _a.sent();
-                next(err_7);
+                err_6 = _a.sent();
+                next(err_6);
                 return [3, 10];
             case 10: return [2];
         }
     });
 }); });
 app.get('/posts/:id', function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var id, connection, rows, err_8;
+    var id, connection, rows, err_7;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -356,7 +358,7 @@ app.get('/posts/:id', function (req, res, next) { return __awaiter(void 0, void 
                 _a.label = 2;
             case 2:
                 _a.trys.push([2, 4, , 5]);
-                return [4, connection.query('SELECT id, title, content, created_at, updated_at FROM posts WHERE id = ?', [id])];
+                return [4, connection.query('SELECT id, title, content, createdAt, updatedAt FROM posts WHERE id = ?', [id])];
             case 3:
                 rows = (_a.sent())[0];
                 if (rows === null) {
@@ -365,8 +367,8 @@ app.get('/posts/:id', function (req, res, next) { return __awaiter(void 0, void 
                 res.send(rows);
                 return [3, 5];
             case 4:
-                err_8 = _a.sent();
-                next(err_8);
+                err_7 = _a.sent();
+                next(err_7);
                 return [3, 5];
             case 5: return [2];
         }
