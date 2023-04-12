@@ -1,15 +1,4 @@
 "use strict";
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -47,170 +36,143 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUser = exports.parted = exports.aupdate = exports.updatePart = exports.updateUser = exports.logout = exports.login = exports.createUser = exports.getUser = exports.getUserList = void 0;
-var users_model_1 = require("./users.model");
-var uuid_1 = require("uuid");
-var users = [];
-var getUserList = function (req, res) {
-    try {
-        var users_1 = users_model_1.User;
-        res.status(200).send({
-            success: true,
-            data: {
-                users: users_1,
-            },
-        });
-    }
-    catch (error) {
-        res.status(400).send({
-            success: false,
-        });
-    }
+exports.login = exports.join = exports.getUser = exports.getUserList = void 0;
+var db_1 = require("../helper/db");
+var crypto_1 = require("crypto");
+var tokenInfo = {
+    email: '',
+    token: '',
 };
-exports.getUserList = getUserList;
-var getUser = function (req, res) {
-    try {
-        var params_1 = req.params;
-        console.log(params_1);
-        var user = users_model_1.User.find(function (user) {
-            return user.id === params_1.id;
-        });
-        res.status(200).send({
-            success: true,
-            data: {
-                user: user,
-            },
-        });
-    }
-    catch (error) {
-        res.status(400).send({
-            success: false,
-        });
-    }
-};
-exports.getUser = getUser;
-var createUser = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var _a, nickname, userId, password, existingUser, newUser;
-    return __generator(this, function (_b) {
-        _a = req.body, nickname = _a.nickname, userId = _a.userId, password = _a.password;
-        existingUser = users.find(function (user) { return user.userId === userId; });
-        if (existingUser) {
-            return [2, res.send('이미 사용중입니당')];
-        }
-        newUser = { id: uuid_1.v4(), nickname: nickname, password: password, userId: userId };
-        users.push(newUser);
-        console.log(newUser);
-        return [2, res.send("\uD658\uC601\uD569\uB2C8\uB2F9\uD83D\uDE0A")];
-    });
-}); };
-exports.createUser = createUser;
-var login = function (req, res) {
-    var _a = req.body, userId = _a.userId, password = _a.password;
-    if (!userId || !password) {
-        return res.status(400).send('이메일과 비밀번호를 입력해주세용');
-    }
-    var user = users_model_1.User.find(function (user) { return user.userId === userId; });
-    if (!user) {
-        return res.status(401).send('이메일을 확인해주세용');
-    }
-    res.json({ message: '로그인 성공🙌', user: user });
-};
-exports.login = login;
-var logout = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+var getUserList = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    var connection, rows;
     return __generator(this, function (_a) {
-        res.json({ message: '로그아웃🥲' });
-        return [2];
+        switch (_a.label) {
+            case 0: return [4, db_1.pool.getConnection()];
+            case 1:
+                connection = _a.sent();
+                return [4, connection.query("SELECT * FROM users").catch(function (err) {
+                        console.log(err);
+                        next(err);
+                    })];
+            case 2:
+                rows = _a.sent();
+                console.log(rows);
+                res.send(rows);
+                return [4, next()];
+            case 3:
+                _a.sent();
+                return [2];
+        }
     });
 }); };
-exports.logout = logout;
-var updateUser = function (req, res) {
-    try {
-        var params_2 = req.params;
-        var body_1 = req.body;
-        var result_1;
-        users_model_1.User.forEach(function (user) {
-            if (user.id === params_2.id) {
-                user = body_1;
-                result_1 = user;
-            }
-        });
-        res.status(200).send({
-            success: true,
-            data: {
-                user: result_1,
-            },
-        });
-    }
-    catch (error) {
-        res.status(400).send({
-            success: false,
-        });
-    }
-};
-exports.updateUser = updateUser;
-var updatePart = function (req, res) {
-    try {
-        var params_3 = req.params;
-        var body_2 = req.body;
-        var result_2;
-        users_model_1.User.forEach(function (user) {
-            if (user.id === params_3.id) {
-                user = __assign(__assign({}, user), body_2);
-                result_2 = user;
-            }
-        });
-        res.status(200).send({
-            success: true,
-            data: {
-                user: result_2,
-            },
-        });
-    }
-    catch (error) {
-        res.status(400).send({
-            success: false,
-        });
-    }
-};
-exports.updatePart = updatePart;
-var aupdate = function (req, res) {
-    var names = [];
-    var promise = new Promise(function (resolve, reject) {
-        setTimeout(function () {
-            resolve('This is done!');
-        }, 2000);
+exports.getUserList = getUserList;
+var getUser = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    var id, connection, rows, err_1;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                id = req.params.id;
+                return [4, db_1.pool.getConnection()];
+            case 1:
+                connection = _a.sent();
+                _a.label = 2;
+            case 2:
+                _a.trys.push([2, 4, , 5]);
+                return [4, connection.query('SELECT * FROM users WHERE `id` = ?', [id])];
+            case 3:
+                rows = (_a.sent())[0];
+                console.log(rows);
+                if (!rows[0]) {
+                    res.send('아이디가 없어용');
+                }
+                else {
+                    res.send(rows);
+                }
+                return [3, 5];
+            case 4:
+                err_1 = _a.sent();
+                next(err_1);
+                return [3, 5];
+            case 5: return [4, next()];
+            case 6:
+                _a.sent();
+                return [2];
+        }
     });
-    promise.then(function (data) {
-        data.split(' ');
+}); };
+exports.getUser = getUser;
+var join = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    var data, connection, rows, result, err_2;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                data = req.body;
+                return [4, db_1.pool.getConnection()];
+            case 1:
+                connection = _a.sent();
+                _a.label = 2;
+            case 2:
+                _a.trys.push([2, 7, , 8]);
+                return [4, connection.query('SELECT * FROM `users` WHERE `email` = ?', [data.email])];
+            case 3:
+                rows = (_a.sent())[0];
+                console.log(rows);
+                if (!(rows.length > 0)) return [3, 4];
+                res.send({ message: '사용중인 이멜이에용' });
+                return [3, 6];
+            case 4: return [4, connection.query('INSERT INTO `users` (`email`, `nick`,`password`) VALUES (?, ?, ?)', [data.email, data.nick, data.password])];
+            case 5:
+                result = (_a.sent())[0];
+                res.send({
+                    message: data.nick + " \uD68C\uC6D0\uAC00\uC785 \uC131\uACF5! ",
+                });
+                _a.label = 6;
+            case 6: return [3, 8];
+            case 7:
+                err_2 = _a.sent();
+                console.log(err_2);
+                return [2, err_2];
+            case 8: return [4, next()];
+            case 9:
+                _a.sent();
+                return [2];
+        }
     });
-};
-exports.aupdate = aupdate;
-var parted = function (req, res) {
-    var names = [];
-    var promise = new Promise(function (resolve, reject) {
-        setTimeout(function () {
-            resolve('This is done!');
-        }, 2000);
+}); };
+exports.join = join;
+var login = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    var data, connection, rows;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                data = req.body;
+                return [4, db_1.pool.getConnection()];
+            case 1:
+                connection = _a.sent();
+                return [4, connection.query('SELECT email FROM `users` WHERE `email` = ? AND `password` = ?', [data.email, data.password])];
+            case 2:
+                rows = (_a.sent())[0];
+                console.log(rows);
+                if (rows.length > 0) {
+                    tokenInfo.email = data.email;
+                    tokenInfo.token = crypto_1.randomUUID();
+                    console.log(tokenInfo.token);
+                    res.send({
+                        message: '로그인 성공!',
+                        token: tokenInfo.token,
+                    });
+                }
+                else {
+                    res.send({
+                        message: '로그인 실패',
+                    });
+                }
+                return [4, next()];
+            case 3:
+                _a.sent();
+                return [2];
+        }
     });
-    promise.then(function (data) {
-        data.split(' ');
-    });
-};
-exports.parted = parted;
-var deleteUser = function (req, res) {
-    try {
-        var params_4 = req.params;
-        var newuser = users_model_1.User.filter(function (user) { return user.id !== params_4.id; });
-        res.status(200).send({
-            success: true,
-            data: newuser,
-        });
-    }
-    catch (error) {
-        res.status(400).send({
-            success: false,
-        });
-    }
-};
-exports.deleteUser = deleteUser;
+}); };
+exports.login = login;
 //# sourceMappingURL=users.service.js.map

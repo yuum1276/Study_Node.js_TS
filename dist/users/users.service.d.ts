@@ -1,11 +1,9 @@
-import { Request, Response } from 'express';
-export declare const getUserList: (req: Request, res: Response) => void;
-export declare const getUser: (req: Request, res: Response) => void;
-export declare const createUser: (req: Request, res: Response) => Promise<Response<any, Record<string, any>>>;
-export declare const login: (req: Request, res: Response) => Response<any, Record<string, any>> | undefined;
-export declare const logout: (req: Request, res: Response) => Promise<void>;
-export declare const updateUser: (req: Request, res: Response) => void;
-export declare const updatePart: (req: Request, res: Response) => void;
-export declare const aupdate: (req: Request, res: Response) => void;
-export declare const parted: (req: Request, res: Response) => void;
-export declare const deleteUser: (req: Request, res: Response) => void;
+import { RequestHandler } from 'express';
+export interface Token {
+    email: string;
+    token: string;
+}
+export declare const getUserList: RequestHandler;
+export declare const getUser: RequestHandler;
+export declare const join: RequestHandler;
+export declare const login: RequestHandler;
