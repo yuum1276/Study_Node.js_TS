@@ -8,6 +8,4 @@ export interface IPost extends RowDataPacket {
     createdAt: Date;
     updatedAt: Date;
 }
-declare class Post {
-}
-export default Post;
+export default IPost;
