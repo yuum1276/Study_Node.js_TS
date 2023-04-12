@@ -3,6 +3,7 @@ import { FieldPacket } from 'mysql2/promise';
 import { IPost } from './posts/Post';
 import IUser from './users/User';
 import { pool } from './helper/db';
+import { randomUUID } from 'crypto';
 
 const app = express();
 const port = 8000;
@@ -29,15 +30,16 @@ app.use(express.urlencoded({ extended: false }));
 // User routes
 // GET /users
 app.get('/users', async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const connection = await pool.getConnection();
-    const rows = await connection.query(`SELECT * FROM users`);
-    console.log(rows);
-    res.send(rows);
-  } catch (err) {
+
+
+  const connection = await pool.getConnection();
+  const rows = await connection.query(`SELECT * FROM users`).catch((err) => {
     console.log(err);
     next(err);
-  }
+  });
+  console.log(rows);
+  res.send(rows);
+  await next();
 });
 
 // GET /users/:id
@@ -47,19 +49,21 @@ app.get(
     const { id } = req.params;
     const connection = await pool.getConnection();
     try {
-      const [rows] = await connection.query(
+      const [rows]: [IUser[], FieldPacket[]] = await connection.query(
         'SELECT * FROM users WHERE `id` = ?',
         [id]
       );
       console.log(rows);
 
-      if (rows === null) {
+      if (!rows[0]) {
         res.send('아이디가 없어용');
+      } else {
+        res.send(rows);
       }
-      res.send(rows);
     } catch (err) {
       next(err);
     }
+    await next();
   }
 );
 
@@ -74,9 +78,10 @@ app.post('/users/join', async (req: Request, res: Response, next: NextFunction) 
       [data.email]
     );
     console.log(rows);
-    
+
+
     if (rows.length > 0) {
-    
+
       res.send({ message: '사용중인 이멜이에용' });
     } else {
       const [result] = await connection.query(
@@ -91,6 +96,7 @@ app.post('/users/join', async (req: Request, res: Response, next: NextFunction) 
     console.log(err);
     return err;
   }
+  await next();
 });
 
 // POST /users/login
@@ -107,7 +113,9 @@ app.post('/users/login', async (req: Request, res: Response, next: NextFunction)
 
   if (rows.length > 0) {
     tokenInfo.email = data.email;
-    tokenInfo.token = 'asdf';
+    tokenInfo.token = randomUUID()
+    console.log(tokenInfo.token);
+    
     res.send({
       message: '로그인 성공!',
       token: tokenInfo.token,
@@ -131,6 +139,7 @@ app.get('/posts', async (req: Request, res: Response, next: NextFunction) => {
   } catch (err) {
     next(err);
   }
+  await next();
 });
 
 // POST /posts/create
@@ -152,151 +161,185 @@ app.post(
       );
       console.log(rows);
 
-      if (rows !== null) {
+      if (rows.length > 0) {
         if (tokenInfo.email === data.email) {
           if (tokenInfo.token === data.token) {
-            const [result]:[IPost[], FieldPacket[]] = await connection.query(
+            const [result]: [IPost[], FieldPacket[]] = await connection.query(
               'INSERT INTO `posts` (`title`, `content`,`email`) VALUES (?, ?, ?)',
               [data.title, data.content, data.email]
             );
-              console.log(result);
-              return res.send({
-                title: data.title,
-                content: data.content,
-                email: data.email,
-                createAt: data.createdAt
-              });
+            console.log(result);
+            return res.send({
+              title: data.title,
+              content: data.content,
+              email: data.email,
+            });
           } else {
             return res.send({
-              message: '로그인 후 이용해주세용',
+              message: '로그인 후 사용가능!',
             });
           }
         } else {
           return res.send({
-            message: '로그인 후 이용해주세용',
+            message: '로그인 후 사용가능!',
           });
         }
       }
     } catch (err) {
       next(err);
     }
+    await next();
   }
 );
 
+// PUT /posts/:id
 app.put('/posts/:id',
   async (req: Request, res: Response, next: NextFunction) => {
 
-    const {id} = req.params;
+    const { id } = req.params;
     const data = <IPost>req.body;
     console.log(data);
 
-      if (data.token === '') {
-        res.send({
-          message: '로그인 후 사용가능!',
-        });
-      }
+    if (data.token === '') {
+      res.send({
+        message: '로그인 후 사용가능!',
+      });
+    }
 
-      const connection = await pool.getConnection();
+    const connection = await pool.getConnection();
 
-      const [rows]: [IUser[], FieldPacket[]] = await connection.query(
-        'SELECT id FROM `posts` WHERE `email` = ? AND `id` = ? ',
-        [data.email, id]
-      ).catch(err => {
-        console.log(err);
-        return err
+    const [rows]: [IUser[], FieldPacket[]] = await connection.query(
+      'SELECT id FROM `posts` WHERE `email` = ? AND `id` = ? ',
+      [data.email, id]
+    ).catch(err => {
+      console.log(err);
+      return err
+    })
+
+    // console.log("rows" + rows[0].id);
+
+    if (rows.length < 0) {
+      console.log('id' + id);
+      res.send({
+        message: '작성된 글이 없음!'
       })
 
-      // console.log("rows" + rows[0].id);
+    } else {
 
-      if (!rows[0]) {
-        console.log('id' + id);
-        res.send('작성된 글이 없음!') 
+      if (tokenInfo.email === data.email) {
 
-      } else {
+        if (tokenInfo.token === data.token) {
 
-        if (tokenInfo.email === data.email) {
-
-          if (tokenInfo.token === data.token) {
-
-            if (!data.title || !data.content) {
-              return res.send('제목, 내용은 필수!');
-            }
-
-            const [result] = await connection.query(
-              'UPDATE posts SET title = ?, content = ? WHERE id = ? AND email = ?',
-              [data.title, data.content, id, data.email]
-            )
-
-            // if (result === null) {
-
-            //   return res.send('작성된 글이 없음!');
-            // }
-
-            res.send('수정 완료!');
-            } else {
-
+          if (!data.title || !data.content) {
             return res.send({
-              message: '로그인 후 사용가능!',
+              message: '제목, 내용은 필수!'
             });
-
           }
-          
+
+          const [result] = await connection.query(
+            'UPDATE posts SET title = ?, content = ? WHERE id = ? AND email = ?',
+            [data.title, data.content, id, data.email]
+          )
+
+          // if (result === null) {
+
+          //   return res.send('작성된 글이 없음!');
+          // }
+
+          res.send({
+            message: '수정 완료!'
+          });
         } else {
 
           return res.send({
             message: '로그인 후 사용가능!',
           });
-        }
-    }
-});
 
+        }
+
+      } else {
+
+        return res.send({
+          message: '로그인 후 사용가능!',
+        });
+      }
+    }
+
+    await next();
+  });
+
+// DELETE /posts/:id
 app.delete(
   '/posts/:id',
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
     const data = <IPost>req.body;
     console.log(data);
-    try {
-      if (data.token === '') {
-        res.send({
-          message: '로그인 후 사용가능!',
-        });
-      }
-      const connection = await pool.getConnection();
-      const [rows]: [IUser[], FieldPacket[]] = await connection.query(
-        'SELECT * FROM `posts` WHERE `email` = ? AND `id` = ?',
-        [data.email, id]
-      );
-      console.log(rows);
 
-      if (!rows[0]) {
-        if (tokenInfo.email === data.email) {
-          if (tokenInfo.token === data.token) {
-            const [result] = await connection.query(
-              'DELETE FROM posts WHERE id = ?',
-              [id]
-            );
-            if (result === null) {
-              return res.send('작성된 글이 없음!');
-            }
-            res.send('삭제 성공!');
-          } else {
-            return res.send({
-              message: '로그인 후 사용가능!',
-            });
-          }
+    if (data.token === '') {
+      res.send({
+        message: '로그인 후 사용가능!',
+      });
+    }
+
+    const connection = await pool.getConnection();
+
+    const [rows]: [IUser[], FieldPacket[]] = await connection.query(
+      'SELECT id FROM `posts` WHERE `email` = ? AND `id` = ? ',
+      [data.email, id]
+    ).catch(err => {
+      console.log(err);
+      return err
+    })
+
+    // console.log("rows" + rows[0].id);
+
+    if (!rows[0]) {
+      console.log('id' + id);
+      res.send({
+        message: '작성된 글이 없음!'
+      })
+
+    } else {
+
+      if (tokenInfo.email === data.email) {
+
+        if (tokenInfo.token === data.token) {
+
+          const [result] = await connection.query(
+            'DELETE FROM posts WHERE id = ?',
+            [id]
+          )
+
+          // if (result === null) {
+
+          //   return res.send('작성된 글이 없음!');
+          // }
+
+          res.send({
+            message: '삭제 완료!'
+          });
         } else {
+
           return res.send({
             message: '로그인 후 사용가능!',
           });
+
         }
+
+      } else {
+
+        return res.send({
+          message: '로그인 후 사용가능!',
+        });
       }
-    } catch (err) {
-      next(err);
     }
+
+    await next();
   }
 );
 
+// GET /posts/:id
 app.get(
   '/posts/:id',
   async (req: Request, res: Response, next: NextFunction) => {
@@ -305,17 +348,21 @@ app.get(
     const connection = await pool.getConnection();
 
     try {
-      const [rows] = await connection.query(
+      const [rows]: [IPost[], FieldPacket[]] = await connection.query(
         'SELECT id, title, content, createdAt, updatedAt FROM posts WHERE id = ?',
         [id]
       );
-      if (rows === null) {
+      if (!rows[0]) {
         res.send('작성된 글이 없어용');
+      } else {
+        res.send(rows);
       }
-      res.send(rows);
+
     } catch (err) {
       next(err);
     }
+
+    await next();
   }
 );
 
