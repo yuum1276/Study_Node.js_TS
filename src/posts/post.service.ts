@@ -1,9 +1,9 @@
 import { RequestHandler } from 'express';
-import { pool } from 'helper/db';
+import { pool } from '../helper/db';
 import { IPost } from './Post';
 import { FieldPacket } from 'mysql2';
 import IUser from 'users/User';
-import { tokenInfo } from 'helper/token';
+import { tokenInfo } from '../helper/token';
 
 export const getPostList: RequestHandler = async (req, res, next) => {
 
@@ -25,6 +25,8 @@ export const getPost: RequestHandler = async (req, res, next) => {
 
   const { id } = req.params;
 
+  const data = req.body;
+
   const connection = await pool.getConnection();
 
   try {
@@ -39,6 +41,19 @@ export const getPost: RequestHandler = async (req, res, next) => {
       res.send('작성된 글이 없어용');
 
     } else {
+
+      // select scrtCode from posts  // 모든 scrtCode 컬럼을 다 가지고와서 
+      // if row[0].scrtCode !== null // scrtCode 가 null이 아닌것만 가지고 옴 else {retrun rows}
+      // select * from posts where scrtCode = scrtCode AND id = id 조건 일치하는지 매칭
+      // 결과가 있으면 return 없으면 scrtCode 불일치
+      // 로그인 안한 user도 scrtCode만 알면 볼수있음
+
+
+
+
+
+
+
 
       res.send(rows);
 
@@ -86,21 +101,43 @@ export const createPost: RequestHandler = async (req, res, next) => {
 
         if (tokenInfo.token === data.token) {
 
-          const [result]: [IPost[], FieldPacket[]] = await connection.query(
-            'INSERT INTO `posts` (`title`, `content`,`email`) VALUES (?, ?, ?)',
-            [data.title, data.content, data.email]
-          );
+          if (!data.scrtCode) {
 
-          console.log(result);
+            const [result]: [IPost[], FieldPacket[]] = await connection.query(
+              'INSERT INTO `posts` (`title`, `content`,`email`) VALUES (?, ?, ?)',
+              [data.title, data.content, data.email]
+            );
 
-          return res.send({
+            console.log(result);
 
-            title: data.title,
+            return res.send({
 
-            content: data.content,
+              title: data.title,
 
-            email: data.email,
-          });
+              content: data.content,
+
+              email: data.email,
+            });
+
+          } else {
+
+            const [result]: [IPost[], FieldPacket[]] = await connection.query(
+              'INSERT INTO `posts` (`title`, `content`,`email`, `scrtCode`) VALUES (?, ?, ?, ?)',
+              [data.title, data.content, data.email, data.scrtCode]
+            );
+
+            console.log(result);
+
+            return res.send({
+
+              title: data.title,
+
+              content: data.content,
+
+              email: data.email,
+            });
+
+          }
 
         } else {
 

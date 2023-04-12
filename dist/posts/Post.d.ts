@@ -5,6 +5,7 @@ export interface IPost extends RowDataPacket {
     content: string;
     token: string;
     email: string;
+    scrtCode: number;
     createdAt: Date;
     updatedAt: Date;
 }

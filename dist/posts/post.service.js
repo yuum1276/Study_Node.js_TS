@@ -62,11 +62,12 @@ var getPostList = function (req, res, next) { return __awaiter(void 0, void 0, v
 }); };
 exports.getPostList = getPostList;
 var getPost = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var id, connection, rows, err_1;
+    var id, data, connection, rows, err_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 id = req.params.id;
+                data = req.body;
                 return [4, db_1.pool.getConnection()];
             case 1:
                 connection = _a.sent();
@@ -96,7 +97,7 @@ var getPost = function (req, res, next) { return __awaiter(void 0, void 0, void 
 }); };
 exports.getPost = getPost;
 var createPost = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var data, connection, rows, result, err_2;
+    var data, connection, rows, result, result, err_2;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -104,7 +105,7 @@ var createPost = function (req, res, next) { return __awaiter(void 0, void 0, vo
                 console.log(data);
                 _a.label = 1;
             case 1:
-                _a.trys.push([1, 9, , 10]);
+                _a.trys.push([1, 12, , 13]);
                 if (data.token === '') {
                     res.send({
                         message: '로그인 후 사용가능!',
@@ -117,9 +118,10 @@ var createPost = function (req, res, next) { return __awaiter(void 0, void 0, vo
             case 3:
                 rows = (_a.sent())[0];
                 console.log(rows);
-                if (!(rows.length > 0)) return [3, 8];
-                if (!(token_1.tokenInfo.email === data.email)) return [3, 7];
-                if (!(token_1.tokenInfo.token === data.token)) return [3, 5];
+                if (!(rows.length > 0)) return [3, 11];
+                if (!(token_1.tokenInfo.email === data.email)) return [3, 10];
+                if (!(token_1.tokenInfo.token === data.token)) return [3, 8];
+                if (!!data.scrtCode) return [3, 5];
                 return [4, connection.query('INSERT INTO `posts` (`title`, `content`,`email`) VALUES (?, ?, ?)', [data.title, data.content, data.email])];
             case 4:
                 result = (_a.sent())[0];
@@ -129,20 +131,30 @@ var createPost = function (req, res, next) { return __awaiter(void 0, void 0, vo
                         content: data.content,
                         email: data.email,
                     })];
-            case 5: return [2, res.send({
+            case 5: return [4, connection.query('INSERT INTO `posts` (`title`, `content`,`email`, `scrtCode`) VALUES (?, ?, ?, ?)', [data.title, data.content, data.email, data.scrtCode])];
+            case 6:
+                result = (_a.sent())[0];
+                console.log(result);
+                return [2, res.send({
+                        title: data.title,
+                        content: data.content,
+                        email: data.email,
+                    })];
+            case 7: return [3, 9];
+            case 8: return [2, res.send({
                     message: '로그인 후 사용가능!',
                 })];
-            case 6: return [3, 8];
-            case 7: return [2, res.send({
+            case 9: return [3, 11];
+            case 10: return [2, res.send({
                     message: '로그인 후 사용가능!',
                 })];
-            case 8: return [3, 10];
-            case 9:
+            case 11: return [3, 13];
+            case 12:
                 err_2 = _a.sent();
                 next(err_2);
-                return [3, 10];
-            case 10: return [4, next()];
-            case 11:
+                return [3, 13];
+            case 13: return [4, next()];
+            case 14:
                 _a.sent();
                 return [2];
         }
