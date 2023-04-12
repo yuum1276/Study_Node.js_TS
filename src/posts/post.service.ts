@@ -1,15 +1,9 @@
-import { Request, RequestHandler, Response } from 'express';
-import { Post } from './post.model';
+import { RequestHandler } from 'express';
 import { pool } from 'helper/db';
 import { IPost } from './Post';
 import { FieldPacket } from 'mysql2';
-import { Token } from 'users/users.service';
 import IUser from 'users/User';
-
-let tokenInfo: Token = {
-  email: '',
-  token: '',
-};
+import { tokenInfo } from 'helper/token';
 
 export const getPostList: RequestHandler = async (req, res, next) => {
 

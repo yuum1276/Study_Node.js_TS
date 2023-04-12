@@ -38,10 +38,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deletePost = exports.updatePost = exports.createPost = exports.getPost = exports.getPostList = void 0;
 var db_1 = require("../helper/db");
-var tokenInfo = {
-    email: '',
-    token: '',
-};
+var token_1 = require("../helper/token");
 var getPostList = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
     var connection, rows;
     return __generator(this, function (_a) {
@@ -121,8 +118,8 @@ var createPost = function (req, res, next) { return __awaiter(void 0, void 0, vo
                 rows = (_a.sent())[0];
                 console.log(rows);
                 if (!(rows.length > 0)) return [3, 8];
-                if (!(tokenInfo.email === data.email)) return [3, 7];
-                if (!(tokenInfo.token === data.token)) return [3, 5];
+                if (!(token_1.tokenInfo.email === data.email)) return [3, 7];
+                if (!(token_1.tokenInfo.token === data.token)) return [3, 5];
                 return [4, connection.query('INSERT INTO `posts` (`title`, `content`,`email`) VALUES (?, ?, ?)', [data.title, data.content, data.email])];
             case 4:
                 result = (_a.sent())[0];
@@ -181,8 +178,8 @@ var updatePost = function (req, res, next) { return __awaiter(void 0, void 0, vo
                 });
                 return [3, 8];
             case 3:
-                if (!(tokenInfo.email === data.email)) return [3, 7];
-                if (!(tokenInfo.token === data.token)) return [3, 5];
+                if (!(token_1.tokenInfo.email === data.email)) return [3, 7];
+                if (!(token_1.tokenInfo.token === data.token)) return [3, 5];
                 if (!data.title || !data.content) {
                     return [2, res.send({
                             message: '제목, 내용은 필수!'
@@ -239,8 +236,8 @@ var deletePost = function (req, res, next) { return __awaiter(void 0, void 0, vo
                 });
                 return [3, 8];
             case 3:
-                if (!(tokenInfo.email === data.email)) return [3, 7];
-                if (!(tokenInfo.token === data.token)) return [3, 5];
+                if (!(token_1.tokenInfo.email === data.email)) return [3, 7];
+                if (!(token_1.tokenInfo.token === data.token)) return [3, 5];
                 return [4, connection.query('DELETE FROM posts WHERE id = ?', [id])];
             case 4:
                 result = (_a.sent())[0];

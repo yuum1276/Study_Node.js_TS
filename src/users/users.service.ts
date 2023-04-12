@@ -3,16 +3,7 @@ import IUser from './User';
 import { pool } from '../helper/db';
 import { FieldPacket } from 'mysql2/promise';
 import { randomUUID } from 'crypto';
-
-export interface Token {
-  email: string;
-  token: string;
-}
-
- let tokenInfo: Token = {
-  email: '',
-  token: '',
-};
+import { tokenInfo } from 'helper/token';
 
 export const getUserList: RequestHandler = async (req, res, next) => {
 

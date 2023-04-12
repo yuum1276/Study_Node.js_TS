@@ -39,10 +39,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.login = exports.join = exports.getUser = exports.getUserList = void 0;
 var db_1 = require("../helper/db");
 var crypto_1 = require("crypto");
-var tokenInfo = {
-    email: '',
-    token: '',
-};
+var token_1 = require("../helper/token");
 var getUserList = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
     var connection, rows;
     return __generator(this, function (_a) {
@@ -154,12 +151,12 @@ var login = function (req, res, next) { return __awaiter(void 0, void 0, void 0,
                 rows = (_a.sent())[0];
                 console.log(rows);
                 if (rows.length > 0) {
-                    tokenInfo.email = data.email;
-                    tokenInfo.token = crypto_1.randomUUID();
-                    console.log(tokenInfo.token);
+                    token_1.tokenInfo.email = data.email;
+                    token_1.tokenInfo.token = crypto_1.randomUUID();
+                    console.log(token_1.tokenInfo.token);
                     res.send({
                         message: '로그인 성공!',
-                        token: tokenInfo.token,
+                        token: token_1.tokenInfo.token,
                     });
                 }
                 else {
