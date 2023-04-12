@@ -226,7 +226,7 @@ app.post('/posts/create', function (req, res, next) { return __awaiter(void 0, v
                 return [4, db_1.pool.getConnection()];
             case 2:
                 connection = _a.sent();
-                return [4, connection.query('SELECT * FROM `users` WHERE `email` = ?', [data.email])];
+                return [4, connection.query('SELECT email FROM `users` WHERE `email` = ?', [data.email])];
             case 3:
                 rows = (_a.sent())[0];
                 console.log(rows);
@@ -283,7 +283,7 @@ app.put('/posts/:id', function (req, res, next) { return __awaiter(void 0, void 
                     })];
             case 2:
                 rows = (_a.sent())[0];
-                if (!(rows.length < 0)) return [3, 3];
+                if (!!rows[0]) return [3, 3];
                 console.log('id' + id);
                 res.send({
                     message: '작성된 글이 없음!'

@@ -4,22 +4,25 @@ import {
   deletePost,
   getPost,
   getPostList,
-  updatePart,
   updatePost,
 } from './post.service';
 
+// Post routes
 const router = Router();
 
-router.get('/board', getPostList);
+// GET /posts
+router.get('/', getPostList);
 
-router.get('/board/:id', getPost);
+// GET /posts/:id
+router.get('/:id', getPost);
 
-router.post('/board', createPost);
+// POST /posts/create
+router.post('/create', createPost);
 
-router.put('/board/:id', updatePost);
+// PUT /posts/:id
+router.put('/posts/:id', updatePost);
 
-router.patch('/board/:id', updatePart);
-
-router.delete('/board/:id', deletePost);
+// DELETE /posts/:id
+router.delete('/:id', deletePost);
 
 export default router;

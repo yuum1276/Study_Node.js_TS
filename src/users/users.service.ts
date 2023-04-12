@@ -1,195 +1,242 @@
-import { Request, Response } from 'express';
-import { User, Users } from './users.model';
-import bcrypt from 'bcryptjs';
-import { v4 as uuidv4 } from 'uuid';
+import { RequestHandler } from 'express';
+import IUser from './User';
+import { pool } from '../helper/db';
+import { FieldPacket } from 'mysql2/promise';
+import { randomUUID } from 'crypto';
 
-const users: Users[] = [];
+export interface Token {
+  email: string;
+  token: string;
+}
 
-export const getUserList = (req: Request, res: Response) => {
-  try {
-    const users = User;
-    res.status(200).send({
-      success: true,
-      data: {
-        users,
-      },
-    });
-  } catch (error) {
-    res.status(400).send({
-      success: false,
-    });
-  }
+ let tokenInfo: Token = {
+  email: '',
+  token: '',
 };
 
-export const getUser = (req: Request, res: Response) => {
-  try {
-    const params = req.params;
-    console.log(params);
-    const user = User.find((user: Users) => {
-      return user.id === params.id;
-    });
-    res.status(200).send({
-      success: true,
-      data: {
-        user,
-      },
-    });
-  } catch (error) {
-    res.status(400).send({
-      success: false,
-    });
-  }
-};
+export const getUserList: RequestHandler = async (req, res, next) => {
 
-export const createUser = async (req: Request, res: Response) => {
-  const { nickname, userId, password } = req.body;
+  const connection = await pool.getConnection();
 
-  const existingUser = users.find((user) => user.userId === userId);
-  if (existingUser) {
-    return res.send('이미 사용중입니당');
-  }
+  const rows = await connection.query(`SELECT * FROM users`).catch((err) => {
 
-  const newUser: Users = { id: uuidv4(), nickname, password, userId};
-  users.push(newUser);
-  console.log(newUser);
+    console.log(err);
 
-  return res.send(`환영합니당😊`);
+    next(err);
 
-  // try {
-  //   const { name, email, password } = req.body;
-  //    console.log(name);
-  //    console.log(email);
-  //    console.log(password);
-  //   if (!name || !email || !password) {
-  //    return res.status(400).send("이름, 이메일, 비밀번호를 입력해주세용");
-  //   }
-
-  //   const existingUser = users.find((user) => user.name === name);
-  //   if (existingUser) {
-  //     res.send("이미 사용중입니당");
-  //   }
-
-  //   const hashedPassword = await bcrypt.hash(password, 10);
-  //   const newUser: Users = { id: uuidv4(), name, email, password: hashedPassword };
-  //   users.push(newUser);
-  //   console.log(users);
-
-  //   return res.send(`${newUser}님 환영합니당😊`)
-  //     // const data = req.body;
-  //     // User.push(data);
-  //     // res.status(200).send({
-  //     //   success: true,
-  //     //   data: { data },
-  //   } catch (error) {
-  //     return res.status(400).send({
-  //     success: false,
-  //   });
-  // }
-};
-
-export const login = (req: Request, res: Response) => {
-  const { userId, password } = req.body;
-  if (!userId || !password) {
-    return res.status(400).send('이메일과 비밀번호를 입력해주세용');
-  }
-  const user = User.find((user:Users) => user.userId === userId);
-  if (!user) {
-    return res.status(401).send('이메일을 확인해주세용');
-  }
-  // const validPassword = await bcrypt.compare(password, user.password);
-  // if (!validPassword) {
-  //   return res.status(401).send("비밀번호를 확인해주세용");
-  // }
-  res.json({ message: '로그인 성공🙌', user });
-};
-
-export const logout = async (req: Request, res: Response) => {
-  res.json({ message: '로그아웃🥲' });
-};
-
-export const updateUser = (req: Request, res: Response) => {
-  try {
-    const params = req.params;
-    const body = req.body;
-    let result;
-    User.forEach((user:Users) => {
-      if (user.id === params.id) {
-        user = body;
-        result = user;
-      }
-    });
-    res.status(200).send({
-      success: true,
-      data: {
-        user: result,
-      },
-    });
-  } catch (error) {
-    res.status(400).send({
-      success: false,
-    });
-  }
-};
-
-export const updatePart = (req: Request, res: Response) => {
-  try {
-    const params = req.params;
-    const body = req.body;
-    let result;
-    User.forEach((user:Users) => {
-      if (user.id === params.id) {
-        user = { ...user, ...body };
-        result = user;
-      }
-    });
-    res.status(200).send({
-      success: true,
-      data: {
-        user: result,
-      },
-    });
-  } catch (error) {
-    res.status(400).send({
-      success: false,
-    });
-  }
-};
-
-export const aupdate = (req: Request, res: Response) => {
-  const names: Array<string | number> = [];
-  const promise: Promise<string> = new Promise((resolve, reject) => {
-    setTimeout(() => {
-      resolve('This is done!');
-    }, 2000);
   });
-  promise.then((data) => {
-    data.split(' ');
-  });
+
+  console.log(rows);
+
+  res.send(rows);
+
+  await next();
 };
 
-export const parted = (req: Request, res: Response) => {
-  const names: Array<string | number> = [];
-  const promise: Promise<string> = new Promise((resolve, reject) => {
-    setTimeout(() => {
-      resolve('This is done!');
-    }, 2000);
-  });
-  promise.then((data) => {
-    data.split(' ');
-  });
-};
+export const getUser: RequestHandler = async (req, res, next) => {
 
-export const deleteUser = (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const connection = await pool.getConnection();
+
   try {
-    const params = req.params;
-    const newuser = User.filter((user:Users) => user.id !== params.id);
-    res.status(200).send({
-      success: true,
-      data: newuser,
+
+    const [rows]: [IUser[], FieldPacket[]] = await connection.query(
+      'SELECT * FROM users WHERE `id` = ?',
+      [id]
+    );
+
+    console.log(rows);
+
+    if (!rows[0]) {
+
+      res.send('아이디가 없어용');
+
+    } else {
+
+      res.send(rows);
+    }
+
+  } catch (err) {
+
+    next(err);
+  }
+  await next();
+
+};
+
+export const join: RequestHandler = async (req, res, next) => {
+
+  const data = <IUser>req.body;
+
+  const connection = await pool.getConnection();
+
+  try {
+
+    const [rows]: [IUser[], FieldPacket[]] = await connection.query(
+      'SELECT * FROM `users` WHERE `email` = ?',
+      [data.email]
+    );
+
+    console.log(rows);
+
+
+    if (rows.length > 0) {
+
+      res.send({ message: '사용중인 이멜이에용' });
+
+    } else {
+
+      const [result] = await connection.query(
+        'INSERT INTO `users` (`email`, `nick`,`password`) VALUES (?, ?, ?)',
+        [data.email, data.nick, data.password]
+      );
+
+      res.send({
+
+        message: `${data.nick} 회원가입 성공! `,
+
+      });
+    }
+  } catch (err) {
+
+    console.log(err);
+
+    return err;
+  }
+  await next();
+
+
+}
+
+export const login: RequestHandler = async (req, res, next) => {
+
+  const data = <IUser>req.body;
+
+  const connection = await pool.getConnection();
+
+  const [rows]: [IUser[], FieldPacket[]] = await connection.query(
+    'SELECT email FROM `users` WHERE `email` = ? AND `password` = ?',
+    [data.email, data.password]
+  );
+
+  console.log(rows);
+
+  if (rows.length > 0) {
+
+    tokenInfo.email = data.email;
+
+    tokenInfo.token = randomUUID();
+
+    console.log(tokenInfo.token);
+
+    res.send({
+
+      message: '로그인 성공!',
+
+      token: tokenInfo.token,
+
     });
-  } catch (error) {
-    res.status(400).send({
-      success: false,
+
+  } else {
+
+    res.send({
+
+      message: '로그인 실패',
+
     });
   }
+
+  await next();
 };
+
+// export const logout = async (req: Request, res: Response) => {
+//   res.json({ message: '로그아웃🥲' });
+// };
+
+// export const updateUser = (req: Request, res: Response) => {
+//   try {
+//     const params = req.params;
+//     const body = req.body;
+//     let result;
+//     User.forEach((user: Users) => {
+//       if (user.id === params.id) {
+//         user = body;
+//         result = user;
+//       }
+//     });
+//     res.status(200).send({
+//       success: true,
+//       data: {
+//         user: result,
+//       },
+//     });
+//   } catch (error) {
+//     res.status(400).send({
+//       success: false,
+//     });
+//   }
+// };
+
+// export const updatePart = (req: Request, res: Response) => {
+//   try {
+//     const params = req.params;
+//     const body = req.body;
+//     let result;
+//     User.forEach((user: Users) => {
+//       if (user.id === params.id) {
+//         user = { ...user, ...body };
+//         result = user;
+//       }
+//     });
+//     res.status(200).send({
+//       success: true,
+//       data: {
+//         user: result,
+//       },
+//     });
+//   } catch (error) {
+//     res.status(400).send({
+//       success: false,
+//     });
+//   }
+// };
+
+// export const aupdate = (req: Request, res: Response) => {
+//   const names: Array<string | number> = [];
+//   const promise: Promise<string> = new Promise((resolve, reject) => {
+//     setTimeout(() => {
+//       resolve('This is done!');
+//     }, 2000);
+//   });
+//   promise.then((data) => {
+//     data.split(' ');
+//   });
+// };
+
+// export const parted = (req: Request, res: Response) => {
+//   const names: Array<string | number> = [];
+//   const promise: Promise<string> = new Promise((resolve, reject) => {
+//     setTimeout(() => {
+//       resolve('This is done!');
+//     }, 2000);
+//   });
+//   promise.then((data) => {
+//     data.split(' ');
+//   });
+// };
+
+// export const deleteUser = (req: Request, res: Response) => {
+//   try {
+//     const params = req.params;
+//     const newuser = User.filter((user: Users) => user.id !== params.id);
+//     res.status(200).send({
+//       success: true,
+//       data: newuser,
+//     });
+//   } catch (error) {
+//     res.status(400).send({
+//       success: false,
+//     });
+//   }
+// };

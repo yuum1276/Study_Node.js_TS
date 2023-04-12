@@ -1,46 +1,24 @@
 import { Router } from 'express';
-import { body } from 'express-validator';
 import {
-  createUser,
-  deleteUser,
   getUser,
   getUserList,
+  join,
   login,
-  logout,
-  updatePart,
-  updateUser,
 } from './users.service';
 
+// User routes
 const router = Router();
 
-router.get('/users', getUserList);
+// GET /users
+router.get('/', getUserList);
 
-router.get('/users/:id', getUser);
+// GET /users/:id
+router.get('/:id', getUser);
 
-router.post(
-  '/signup',
-  [
-    body('email').exists().isEmail(),
-    body('password').exists().isLength({ min: 10, max: 20 }),
-  ],
-  createUser
-);
+// POST /users/join
+router.post('/join', join);
 
-router.post(
-  '/login',
-  [
-    body('email').exists().isEmail().withMessage('이메일을 입력해주세요!'),
-    body('password').exists().isLength({ min: 10, max: 20 }),
-  ],  
-  login
-);
-
-router.get('/logout', logout);
-
-router.put('/users/:id', updateUser);
-
-router.patch('/users/:id', updatePart);
-
-router.delete('/users/:id', deleteUser);
+// POST /users/login
+router.post('/login', login);
 
 export default router;
