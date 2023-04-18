@@ -49,17 +49,12 @@ var getPostList = function (req, res, next) { return __awaiter(void 0, void 0, v
                 return [4, db_1.pool.getConnection()];
             case 1:
                 connection = _a.sent();
-                return [4, connection.query("SELECT * CASE WHEN secret = 'y' THEN 'SECRET' ELSE 'NOMAL' AS 'postCase' FROM posts")];
+                return [4, connection.query('SELECT * FROM posts')];
             case 2:
                 rows = (_a.sent())[0];
                 rows.forEach(function () {
                 });
-                if (rows.length > 0) {
-                    res.send({ message: '비밀글' });
-                }
-                else {
-                    res.send(rows);
-                }
+                res.send(rows);
                 return [3, 4];
             case 3:
                 err_1 = _a.sent();
@@ -91,34 +86,31 @@ var getPost = function (req, res, next) { return __awaiter(void 0, void 0, void 
             case 3:
                 rows = (_a.sent())[0];
                 if (!!rows[0]) return [3, 4];
-                res.send('작성된 글이 없어용');
+                res.send({
+                    message: '작성된 글이 없어용'
+                });
                 return [3, 7];
             case 4:
                 if (!(rows[0].secret === 'Y')) return [3, 6];
                 return [4, connection.query("SELECT * FROM posts WHERE scrtCode = ? AND id = ?", [data.scrtCode, id])];
             case 5:
                 result = (_a.sent())[0];
-                if (!result) {
+                if (result.length > 0) {
+                    res.send(rows);
+                }
+                else {
                     res.send({
                         message: "secret code 불일치"
                     });
                 }
-                else {
-                    res.send(rows);
-                }
                 return [3, 7];
-            case 6:
-                res.send(rows);
-                _a.label = 7;
+            case 6: return [2, res.send(rows)];
             case 7: return [3, 9];
             case 8:
                 err_2 = _a.sent();
                 next(err_2);
                 return [3, 9];
-            case 9: return [4, next()];
-            case 10:
-                _a.sent();
-                return [2];
+            case 9: return [2];
         }
     });
 }); };
@@ -169,7 +161,7 @@ var createPost = function (req, res, next) { return __awaiter(void 0, void 0, vo
                             message: '제목, 내용은 필수!'
                         })];
                 }
-                return [4, connection.query('INSERT INTO `posts` (`title`, `content`,`email`, `scrtCode`) VALUES (?, ?, ?, ?)', [data.title, data.content, data.email, data.scrtCode])];
+                return [4, connection.query('INSERT INTO `posts` (`title`, `content`,`email`, `secret` ,`scrtCode`) VALUES (?, ?, ?, ? ,?)', [data.title, data.content, data.email, data.secret, data.scrtCode])];
             case 6:
                 result = (_a.sent())[0];
                 console.log(result);
@@ -183,7 +175,7 @@ var createPost = function (req, res, next) { return __awaiter(void 0, void 0, vo
                 })];
             case 8: return [3, 10];
             case 9: return [2, res.send({
-                    message: '로그인 후 사용가능!',
+                    message: 'Token 불일치',
                 })];
             case 10: return [3, 12];
             case 11:

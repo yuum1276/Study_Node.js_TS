@@ -4,6 +4,7 @@ import {
   getUserList,
   join,
   login,
+  logout,
 } from './users.service';
 
 // User routes
@@ -20,5 +21,8 @@ router.post('/join', join);
 
 // POST /users/login
 router.post('/login', login);
+
+// POST /users/logout
+router.post('/logout', logout);
 
 export default router;

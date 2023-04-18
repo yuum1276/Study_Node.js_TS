@@ -3,7 +3,7 @@ import IUser from './User';
 import { pool } from '../helper/db';
 import { FieldPacket } from 'mysql2/promise';
 import { randomUUID } from 'crypto';
-import { tokenInfo } from 'helper/token';
+import { tokenInfo } from '../helper/token';
 
 export const getUserList: RequestHandler = async (req, res, next) => {
 
@@ -21,7 +21,6 @@ export const getUserList: RequestHandler = async (req, res, next) => {
 
   res.send(rows);
 
-  await next();
 };
 
 export const getUser: RequestHandler = async (req, res, next) => {
@@ -52,7 +51,6 @@ export const getUser: RequestHandler = async (req, res, next) => {
 
     next(err);
   }
-  await next();
 
 };
 
@@ -95,9 +93,7 @@ export const join: RequestHandler = async (req, res, next) => {
 
     return err;
   }
-  await next();
-
-
+  
 }
 
 export const login: RequestHandler = async (req, res, next) => {
@@ -137,97 +133,8 @@ export const login: RequestHandler = async (req, res, next) => {
 
     });
   }
-
-  await next();
 };
 
-// export const logout = async (req: Request, res: Response) => {
-//   res.json({ message: '로그아웃🥲' });
-// };
-
-// export const updateUser = (req: Request, res: Response) => {
-//   try {
-//     const params = req.params;
-//     const body = req.body;
-//     let result;
-//     User.forEach((user: Users) => {
-//       if (user.id === params.id) {
-//         user = body;
-//         result = user;
-//       }
-//     });
-//     res.status(200).send({
-//       success: true,
-//       data: {
-//         user: result,
-//       },
-//     });
-//   } catch (error) {
-//     res.status(400).send({
-//       success: false,
-//     });
-//   }
-// };
-
-// export const updatePart = (req: Request, res: Response) => {
-//   try {
-//     const params = req.params;
-//     const body = req.body;
-//     let result;
-//     User.forEach((user: Users) => {
-//       if (user.id === params.id) {
-//         user = { ...user, ...body };
-//         result = user;
-//       }
-//     });
-//     res.status(200).send({
-//       success: true,
-//       data: {
-//         user: result,
-//       },
-//     });
-//   } catch (error) {
-//     res.status(400).send({
-//       success: false,
-//     });
-//   }
-// };
-
-// export const aupdate = (req: Request, res: Response) => {
-//   const names: Array<string | number> = [];
-//   const promise: Promise<string> = new Promise((resolve, reject) => {
-//     setTimeout(() => {
-//       resolve('This is done!');
-//     }, 2000);
-//   });
-//   promise.then((data) => {
-//     data.split(' ');
-//   });
-// };
-
-// export const parted = (req: Request, res: Response) => {
-//   const names: Array<string | number> = [];
-//   const promise: Promise<string> = new Promise((resolve, reject) => {
-//     setTimeout(() => {
-//       resolve('This is done!');
-//     }, 2000);
-//   });
-//   promise.then((data) => {
-//     data.split(' ');
-//   });
-// };
-
-// export const deleteUser = (req: Request, res: Response) => {
-//   try {
-//     const params = req.params;
-//     const newuser = User.filter((user: Users) => user.id !== params.id);
-//     res.status(200).send({
-//       success: true,
-//       data: newuser,
-//     });
-//   } catch (error) {
-//     res.status(400).send({
-//       success: false,
-//     });
-//   }
-// };
+export const logout: RequestHandler = async (req, res, next) => {
+  res.send({ message: '로그아웃🥲' });
+};

@@ -7,5 +7,6 @@ router.get('/', users_service_1.getUserList);
 router.get('/:id', users_service_1.getUser);
 router.post('/join', users_service_1.join);
 router.post('/login', users_service_1.login);
+router.post('/logout', users_service_1.logout);
 exports.default = router;
 //# sourceMappingURL=users.route.js.map

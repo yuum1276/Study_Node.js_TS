@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.login = exports.join = exports.getUser = exports.getUserList = void 0;
+exports.logout = exports.login = exports.join = exports.getUser = exports.getUserList = void 0;
 var db_1 = require("../helper/db");
 var crypto_1 = require("crypto");
 var token_1 = require("../helper/token");
@@ -55,9 +55,6 @@ var getUserList = function (req, res, next) { return __awaiter(void 0, void 0, v
                 rows = _a.sent();
                 console.log(rows);
                 res.send(rows);
-                return [4, next()];
-            case 3:
-                _a.sent();
                 return [2];
         }
     });
@@ -90,10 +87,7 @@ var getUser = function (req, res, next) { return __awaiter(void 0, void 0, void 
                 err_1 = _a.sent();
                 next(err_1);
                 return [3, 5];
-            case 5: return [4, next()];
-            case 6:
-                _a.sent();
-                return [2];
+            case 5: return [2];
         }
     });
 }); };
@@ -129,10 +123,7 @@ var join = function (req, res, next) { return __awaiter(void 0, void 0, void 0, 
                 err_2 = _a.sent();
                 console.log(err_2);
                 return [2, err_2];
-            case 8: return [4, next()];
-            case 9:
-                _a.sent();
-                return [2];
+            case 8: return [2];
         }
     });
 }); };
@@ -164,12 +155,16 @@ var login = function (req, res, next) { return __awaiter(void 0, void 0, void 0,
                         message: '로그인 실패',
                     });
                 }
-                return [4, next()];
-            case 3:
-                _a.sent();
                 return [2];
         }
     });
 }); };
 exports.login = login;
+var logout = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        res.send({ message: '로그아웃🥲' });
+        return [2];
+    });
+}); };
+exports.logout = logout;
 //# sourceMappingURL=users.service.js.map

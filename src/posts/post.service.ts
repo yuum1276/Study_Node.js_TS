@@ -15,27 +15,18 @@ export const getPostList: RequestHandler = async (req, res, next) => {
 
   const connection = await pool.getConnection();
 
-  // const [rows]:[IPost[], FieldPacket[]] = await connection.query('SELECT * FROM posts');
-  const [rows]:[IPost[], FieldPacket[]] = await connection.query(`SELECT * CASE WHEN secret = 'y' THEN 'SECRET' ELSE 'NOMAL' AS 'postCase' FROM posts`);
+  const [rows]:[IPost[], FieldPacket[]] = await connection.query('SELECT * FROM posts');
+  // const [rows]:[IPost[], FieldPacket[]] = await connection.query(`SELECT * CASE WHEN secret = 'y' THEN 'SECRET' ELSE 'NOMAL' AS 'postCase' FROM posts`);
 
   rows.forEach(() => {
-
-  })
-
-  /**
+     /**
    * secret = 'y' 일때는 비밀글 
    *  rows[?].secret = 'y'
    */
 
-  if(rows.length > 0){
-
-    res.send({message: '비밀글'})
-
-  } else {
+  })
 
     res.send(rows);
-
-  }
 
  } catch (err){
 
@@ -66,7 +57,9 @@ export const getPost: RequestHandler = async (req, res, next) => {
 
     if (!rows[0]) {
 
-      res.send('작성된 글이 없어용');
+      res.send({
+        message:'작성된 글이 없어용'
+      });
 
     } else {
 
@@ -76,36 +69,32 @@ export const getPost: RequestHandler = async (req, res, next) => {
           `SELECT * FROM posts WHERE scrtCode = ? AND id = ?` , [data.scrtCode, id]
         )
 
-        if(!result) {
-          res.send({
+        if(result.length > 0) {
+
+          res.send(rows);
+          
+        } else {
+
+         res.send({
             message: "secret code 불일치"
           })
-        } else {
-          res.send(rows);
+
+          
+        
         }
 
       } else {
-        res.send(rows);
+
+       return res.send(rows);
+      
       }
 
-      
-
-      // secret Yn check
-      // select scrtCode from posts  // 모든 scrtCode 컬럼을 다 가지고와서 
-      // if row[0].scrtCode !== null // scrtCode 가 null이 아닌것만 가지고 옴 else {retrun rows}
-      // select * from posts where scrtCode = scrtCode AND id = id 조건 일치하는지 매칭
-      // 결과가 있으면 return 없으면 scrtCode 불일치
-      // 로그인 안한 user도 scrtCode만 알면 볼수있음
-
-    
     }
 
   } catch (err) {
 
     next(err);
   }
-
-  await next();
 
 }
 
@@ -182,8 +171,8 @@ export const createPost: RequestHandler = async (req, res, next) => {
 
 
             const [result]: [IPost[], FieldPacket[]] = await connection.query(
-              'INSERT INTO `posts` (`title`, `content`,`email`, `scrtCode`) VALUES (?, ?, ?, ?)',
-              [data.title, data.content, data.email, data.scrtCode]
+              'INSERT INTO `posts` (`title`, `content`,`email`, `secret` ,`scrtCode`) VALUES (?, ?, ?, ? ,?)',
+              [data.title, data.content, data.email, data.secret ,data.scrtCode]
             );
 
             console.log(result);
@@ -211,7 +200,7 @@ export const createPost: RequestHandler = async (req, res, next) => {
 
         return res.send({
 
-          message: '로그인 후 사용가능!',
+          message: 'Token 불일치',
 
         });
       }

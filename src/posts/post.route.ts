@@ -20,6 +20,7 @@ router.get('/:id', getPost);
 router.post('/create', createPost);
 
 // PUT /posts/:id
+
 router.put('/posts/:id', updatePost);
 
 // DELETE /posts/:id
