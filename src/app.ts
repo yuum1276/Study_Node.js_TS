@@ -1,30 +1,63 @@
-import express, { Request, Response, NextFunction, ErrorRequestHandler } from 'express';
+import express, { ErrorRequestHandler } from 'express';
 import postRouter from './posts/post.route'
 import userRouter from './users/users.route'
 
-const app = express();
-const port = 8000;
+class Server {
+  public app: express.Application;
 
-// Middleware to handle errors
-app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  console.error(err.stack);
-  res.status(500).send('Something went wrong!');
-});
+  constructor() {
+    const app: express.Application = express();
+    this.app = app;
+  }
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+  private setRouter() {
+    this.app.use('/posts', postRouter);
+    this.app.use('/users', userRouter);
+  }
 
-app.use('/posts', postRouter);
-app.use('/users', userRouter);
+  private setMiddleware() {
 
-const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
-  res.status(500).send({
-    message: 'Server Error',
-    error: err,
-  });
-};
-app.use(errorHandler);
+    // logging middleware
+    this.app.use((req, res, next) => {
+      console.log(req.rawHeaders[1]);
+      console.log('this is logging middleware');
+      next();
+    });
 
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
+    // json middlware
+    this.app.use(express.json());
+    this.app.use(express.urlencoded({ extended: false }));
+    this.setRouter();
+
+    // 404 middleware
+    this.app.use((req, res, next) => {
+      console.log('This is error middleware');
+      return res.send({ error: '404 not found error' });
+    });
+
+    // error middlware
+  //   const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
+  //     res.status(500).send({
+  //      message: 'Server Error',
+  //      error: err,
+  //    });
+  //  };
+   
+  //  this.app.use(errorHandler);
+  }
+
+  public listen() {
+    const port: number = 8000;
+    this.setMiddleware();
+    this.app.listen(port, () => {
+      console.log(`Server running on port ${port}`);
+    });
+  }
+}
+
+function init() {
+  const server = new Server();
+  server.listen()
+}
+
+init();

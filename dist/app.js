@@ -6,24 +6,41 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = __importDefault(require("express"));
 var post_route_1 = __importDefault(require("./posts/post.route"));
 var users_route_1 = __importDefault(require("./users/users.route"));
-var app = express_1.default();
-var port = 8000;
-app.use(function (err, req, res, next) {
-    console.error(err.stack);
-    res.status(500).send('Something went wrong!');
-});
-app.use(express_1.default.json());
-app.use(express_1.default.urlencoded({ extended: false }));
-app.use('/posts', post_route_1.default);
-app.use('/users', users_route_1.default);
-var errorHandler = function (err, req, res, next) {
-    res.status(500).send({
-        message: 'Server Error',
-        error: err,
-    });
-};
-app.use(errorHandler);
-app.listen(port, function () {
-    console.log("Server running on port " + port);
-});
+var Server = (function () {
+    function Server() {
+        var app = express_1.default();
+        this.app = app;
+    }
+    Server.prototype.setRouter = function () {
+        this.app.use('/posts', post_route_1.default);
+        this.app.use('/users', users_route_1.default);
+    };
+    Server.prototype.setMiddleware = function () {
+        this.app.use(function (req, res, next) {
+            console.log(req.rawHeaders[1]);
+            console.log('this is logging middleware');
+            next();
+        });
+        this.app.use(express_1.default.json());
+        this.app.use(express_1.default.urlencoded({ extended: false }));
+        this.setRouter();
+        this.app.use(function (req, res, next) {
+            console.log('This is error middleware');
+            return res.send({ error: '404 not found error' });
+        });
+    };
+    Server.prototype.listen = function () {
+        var port = 8000;
+        this.setMiddleware();
+        this.app.listen(port, function () {
+            console.log("Server running on port " + port);
+        });
+    };
+    return Server;
+}());
+function init() {
+    var server = new Server();
+    server.listen();
+}
+init();
 //# sourceMappingURL=app.js.map

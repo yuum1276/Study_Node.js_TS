@@ -5,17 +5,45 @@ import { FieldPacket } from 'mysql2';
 import IUser from 'users/User';
 import { tokenInfo } from '../helper/token';
 
+type PostList = string[];
+
+const board: Map<string, PostList> = new Map();
+
 export const getPostList: RequestHandler = async (req, res, next) => {
+
+ try {
 
   const connection = await pool.getConnection();
 
-  const rows = await connection.query('SELECT * FROM posts').catch((err) => {
-    console.log(err);
-    next(err);
+  // const [rows]:[IPost[], FieldPacket[]] = await connection.query('SELECT * FROM posts');
+  const [rows]:[IPost[], FieldPacket[]] = await connection.query(`SELECT * CASE WHEN secret = 'y' THEN 'SECRET' ELSE 'NOMAL' AS 'postCase' FROM posts`);
+
+  rows.forEach(() => {
 
   })
 
-  res.send(rows);
+  /**
+   * secret = 'y' 일때는 비밀글 
+   *  rows[?].secret = 'y'
+   */
+
+  if(rows.length > 0){
+
+    res.send({message: '비밀글'})
+
+  } else {
+
+    res.send(rows);
+
+  }
+
+ } catch (err){
+
+  console.log(err);
+  
+  next(err);
+
+ }
 
   await next();
 
@@ -32,7 +60,7 @@ export const getPost: RequestHandler = async (req, res, next) => {
   try {
 
     const [rows]: [IPost[], FieldPacket[]] = await connection.query(
-      'SELECT id, title, content, createdAt, updatedAt FROM posts WHERE id = ?',
+      'SELECT * FROM posts WHERE id = ?',
       [id]
     );
 
@@ -42,21 +70,34 @@ export const getPost: RequestHandler = async (req, res, next) => {
 
     } else {
 
+      if(rows[0].secret === 'Y') {
+
+        const [result]:[IPost[], FieldPacket[]] = await connection.query(
+          `SELECT * FROM posts WHERE scrtCode = ? AND id = ?` , [data.scrtCode, id]
+        )
+
+        if(!result) {
+          res.send({
+            message: "secret code 불일치"
+          })
+        } else {
+          res.send(rows);
+        }
+
+      } else {
+        res.send(rows);
+      }
+
+      
+
+      // secret Yn check
       // select scrtCode from posts  // 모든 scrtCode 컬럼을 다 가지고와서 
       // if row[0].scrtCode !== null // scrtCode 가 null이 아닌것만 가지고 옴 else {retrun rows}
       // select * from posts where scrtCode = scrtCode AND id = id 조건 일치하는지 매칭
       // 결과가 있으면 return 없으면 scrtCode 불일치
       // 로그인 안한 user도 scrtCode만 알면 볼수있음
 
-
-
-
-
-
-
-
-      res.send(rows);
-
+    
     }
 
   } catch (err) {
@@ -97,29 +138,48 @@ export const createPost: RequestHandler = async (req, res, next) => {
 
     if (rows.length > 0) {
 
-      if (tokenInfo.email === data.email) {
+      if (tokenInfo.token === data.token) {
 
-        if (tokenInfo.token === data.token) {
+        if (!data.secret) {
 
-          if (!data.scrtCode) {
-
-            const [result]: [IPost[], FieldPacket[]] = await connection.query(
-              'INSERT INTO `posts` (`title`, `content`,`email`) VALUES (?, ?, ?)',
-              [data.title, data.content, data.email]
-            );
-
-            console.log(result);
+          if (!data.title || !data.content) {
 
             return res.send({
 
-              title: data.title,
+              message: '제목, 내용은 필수!'
 
-              content: data.content,
-
-              email: data.email,
             });
+          }
 
-          } else {
+          const [result]: [IPost[], FieldPacket[]] = await connection.query(
+            'INSERT INTO `posts` (`title`, `content`,`email`) VALUES (?, ?, ?)',
+            [data.title, data.content, data.email]
+          );
+
+          console.log(result);
+
+          return res.send({
+
+            title: data.title,
+
+            content: data.content,
+
+            email: data.email,
+          });
+
+        } else {
+
+          if (data.scrtCode) {
+
+            if (!data.title || !data.content) {
+
+              return res.send({
+
+                message: '제목, 내용은 필수!'
+
+              });
+            }
+
 
             const [result]: [IPost[], FieldPacket[]] = await connection.query(
               'INSERT INTO `posts` (`title`, `content`,`email`, `scrtCode`) VALUES (?, ?, ?, ?)',
@@ -137,23 +197,25 @@ export const createPost: RequestHandler = async (req, res, next) => {
               email: data.email,
             });
 
+          } else {
+
+            return res.send({
+              message: '비밀번호를 입력해주세용'
+            })
+
           }
 
-        } else {
-
-          return res.send({
-
-            message: '로그인 후 사용가능!',
-
-          });
         }
+
       } else {
+
         return res.send({
 
           message: '로그인 후 사용가능!',
 
         });
       }
+
     }
   } catch (err) {
 
