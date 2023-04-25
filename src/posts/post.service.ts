@@ -7,36 +7,33 @@ import { tokenInfo } from '../helper/token';
 
 type PostList = string[];
 
-const board: Map<string, PostList> = new Map();
-
 export const getPostList: RequestHandler = async (req, res, next) => {
 
- try {
+  try {
 
-  const connection = await pool.getConnection();
+    const connection = await pool.getConnection();
 
-  const [rows]:[IPost[], FieldPacket[]] = await connection.query('SELECT * FROM posts');
-  // const [rows]:[IPost[], FieldPacket[]] = await connection.query(`SELECT * CASE WHEN secret = 'y' THEN 'SECRET' ELSE 'NOMAL' AS 'postCase' FROM posts`);
+    let board:IPost[] =[];
 
-  rows.forEach(() => {
-     /**
-   * secret = 'y' 일때는 비밀글 
-   *  rows[?].secret = 'y'
-   */
+    const [rows]: [IPost[], FieldPacket[]] = await connection.query('SELECT * FROM posts');
+    console.log(rows[0]);
+    
+    for(const row of rows){
+      if(row.secret === 'n'){
+        board.push(row)
+      } else {
+        return "🔒 SECRET POST"
+        // board.push({row.content: "🔒 SECRET POST"})
+      }
+    }
+      res.send(board)
+  } catch (err) {
 
-  })
+    console.log(err);
 
-    res.send(rows);
+    next(err);
 
- } catch (err){
-
-  console.log(err);
-  
-  next(err);
-
- }
-
-  await next();
+  }
 
 };
 
@@ -58,35 +55,35 @@ export const getPost: RequestHandler = async (req, res, next) => {
     if (!rows[0]) {
 
       res.send({
-        message:'작성된 글이 없어용'
+        message: '작성된 글이 없어용'
       });
 
     } else {
 
-      if(rows[0].secret === 'Y') {
+      if (rows[0].secret === 'Y') {
 
-        const [result]:[IPost[], FieldPacket[]] = await connection.query(
-          `SELECT * FROM posts WHERE scrtCode = ? AND id = ?` , [data.scrtCode, id]
+        const [result]: [IPost[], FieldPacket[]] = await connection.query(
+          `SELECT * FROM posts WHERE scrtCode = ? AND id = ?`, [data.scrtCode, id]
         )
 
-        if(result.length > 0) {
+        if (result.length > 0) {
 
           res.send(rows);
-          
+
         } else {
 
-         res.send({
+          res.send({
             message: "secret code 불일치"
           })
 
-          
-        
+
+
         }
 
       } else {
 
-       return res.send(rows);
-      
+        return res.send(rows);
+
       }
 
     }
@@ -172,7 +169,7 @@ export const createPost: RequestHandler = async (req, res, next) => {
 
             const [result]: [IPost[], FieldPacket[]] = await connection.query(
               'INSERT INTO `posts` (`title`, `content`,`email`, `secret` ,`scrtCode`) VALUES (?, ?, ?, ? ,?)',
-              [data.title, data.content, data.email, data.secret ,data.scrtCode]
+              [data.title, data.content, data.email, data.secret, data.scrtCode]
             );
 
             console.log(result);

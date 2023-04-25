@@ -39,9 +39,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deletePost = exports.updatePost = exports.createPost = exports.getPost = exports.getPostList = void 0;
 var db_1 = require("../helper/db");
 var token_1 = require("../helper/token");
-var board = new Map();
 var getPostList = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var connection, rows, err_1;
+    var connection, board, rows, _i, rows_1, row, err_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -49,22 +48,28 @@ var getPostList = function (req, res, next) { return __awaiter(void 0, void 0, v
                 return [4, db_1.pool.getConnection()];
             case 1:
                 connection = _a.sent();
+                board = [];
                 return [4, connection.query('SELECT * FROM posts')];
             case 2:
                 rows = (_a.sent())[0];
-                rows.forEach(function () {
-                });
-                res.send(rows);
+                console.log(rows[0]);
+                for (_i = 0, rows_1 = rows; _i < rows_1.length; _i++) {
+                    row = rows_1[_i];
+                    if (row.secret === 'n') {
+                        board.push(row);
+                    }
+                    else {
+                        return [2, "🔒 SECRET POST"];
+                    }
+                }
+                res.send(board);
                 return [3, 4];
             case 3:
                 err_1 = _a.sent();
                 console.log(err_1);
                 next(err_1);
                 return [3, 4];
-            case 4: return [4, next()];
-            case 5:
-                _a.sent();
-                return [2];
+            case 4: return [2];
         }
     });
 }); };
