@@ -5,28 +5,31 @@ import { FieldPacket } from 'mysql2';
 import IUser from 'users/User';
 import { tokenInfo } from '../helper/token';
 
-type PostList = string[];
-
 export const getPostList: RequestHandler = async (req, res, next) => {
 
   try {
 
     const connection = await pool.getConnection();
 
-    let board:IPost[] =[];
+    let board: IPost[] | any = [];
 
     const [rows]: [IPost[], FieldPacket[]] = await connection.query('SELECT * FROM posts');
-    console.log(rows[0]);
-    
-    for(const row of rows){
-      if(row.secret === 'n'){
+
+    for (const row of rows) {
+
+      if (row.secret === 'n') {
+
         board.push(row)
+
       } else {
-        return "🔒 SECRET POST"
-        // board.push({row.content: "🔒 SECRET POST"})
+
+        board.push({ post: "🔒SECRET POST" })
+
       }
     }
-      res.send(board)
+
+    res.send(board)
+
   } catch (err) {
 
     console.log(err);
@@ -75,8 +78,6 @@ export const getPost: RequestHandler = async (req, res, next) => {
           res.send({
             message: "secret code 불일치"
           })
-
-
 
         }
 
@@ -240,8 +241,6 @@ export const updatePost: RequestHandler = async (req, res, next) => {
     console.log(err);
     return err
   })
-
-  // console.log("rows" + rows[0].id);
 
   if (!rows[0]) {
 

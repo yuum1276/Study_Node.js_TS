@@ -52,14 +52,13 @@ var getPostList = function (req, res, next) { return __awaiter(void 0, void 0, v
                 return [4, connection.query('SELECT * FROM posts')];
             case 2:
                 rows = (_a.sent())[0];
-                console.log(rows[0]);
                 for (_i = 0, rows_1 = rows; _i < rows_1.length; _i++) {
                     row = rows_1[_i];
                     if (row.secret === 'n') {
                         board.push(row);
                     }
                     else {
-                        return [2, "🔒 SECRET POST"];
+                        board.push({ post: "🔒SECRET POST" });
                     }
                 }
                 res.send(board);
