@@ -59,7 +59,7 @@ var getCommentList = function (req, res, next) { return __awaiter(void 0, void 0
                     else {
                         comments.push({ comments: "🔒" });
                     }
-                }  
+                }
                 return [3, 4];
             case 3:
                 err_1 = _a.sent();
@@ -74,35 +74,19 @@ var getCommentList = function (req, res, next) { return __awaiter(void 0, void 0
 }); };
 exports.getCommentList = getCommentList;
 var insertComment = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var data, connection, comments, row, row, err_2;
+    function getComments(postId, parentCommentId, callback) {
+        connection.query('SELECT * FROM comments WHERE post_id = ? AND parent_comment_id ' + (parentCommentId === null ? 'IS NULL' : '= ?'), parentCommentId === null ? [postId] : [postId, parentCommentId]);
+    }
+    var connection, postId;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0:
-                data = req.body;
-                _a.label = 1;
+            case 0: return [4, db_1.pool.getConnection()];
             case 1:
-                _a.trys.push([1, 7, , 8]);
-                return [4, db_1.pool.getConnection()];
-            case 2:
                 connection = _a.sent();
-                comments = [];
-                if (!(data.secret === 'Y')) return [3, 4];
-                return [4, connection.query('INSERT INTO (`postId`, `email`, `nick`, `secret`, `scrtCode`) VALUES (?, ?, ?, ?, ?)', [data.postId, data.email, data.nick, data.secret, data.scrtCode])];
-            case 3:
-                row = (_a.sent())[0];
-                return [2, res.send({})];
-            case 4: return [4, connection.query('INSERT INTO (`postId`, `email`, `nick`, `secret`) VALUES (?, ?, ?, ?)', [data.postId, data.email, data.nick, data.secret])];
-            case 5:
-                row = (_a.sent())[0];
-                return [2, res.send({})];
-            case 6: return [3, 8];
-            case 7:
-                err_2 = _a.sent();
-                next(err_2);
-                return [3, 8];
-            case 8: return [4, next()];
-            case 9:
-                _a.sent();
+                postId = req.params.postId;
+                getComments(parseInt(postId), null, function (comments) {
+                    res.json(comments);
+                });
                 return [2];
         }
     });

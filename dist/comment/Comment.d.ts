@@ -4,6 +4,7 @@ export interface IComment extends RowDataPacket {
     postId: number;
     email: string;
     nick: string;
+    content: string;
     secret: string;
     scrtCode: string;
     createdAt: Date;
