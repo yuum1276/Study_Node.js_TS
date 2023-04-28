@@ -14,7 +14,7 @@ export const getPostList: RequestHandler = async (req, res, next) => {
     let board: IPost[] | any = [];
 
     const [rows]: [IPost[], FieldPacket[]] = await connection.query('SELECT * FROM posts');
-
+  
     for (const row of rows) {
 
       if (row.secret === 'n') {
@@ -32,7 +32,7 @@ export const getPostList: RequestHandler = async (req, res, next) => {
 
   } catch (err) {
 
-    console.log(err);
+    console.log(err);  
 
     next(err);
 
@@ -103,7 +103,7 @@ export const createPost: RequestHandler = async (req, res, next) => {
 
   console.log(data);
 
-  try {
+  try {  
 
     if (data.token === '') {
 

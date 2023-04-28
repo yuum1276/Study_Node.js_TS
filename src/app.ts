@@ -1,6 +1,7 @@
 import express, { ErrorRequestHandler } from 'express';
 import postRouter from './posts/post.route'
 import userRouter from './users/users.route'
+import commentRouter from './comment/comment.route'
 
 class Server {
   public app: express.Application;
@@ -13,6 +14,7 @@ class Server {
   private setRouter() {
     this.app.use('/posts', postRouter);
     this.app.use('/users', userRouter);
+    this.app.use('/comments', commentRouter)
   }
 
   private setMiddleware() {
@@ -36,14 +38,14 @@ class Server {
     });
 
     // error middlware
-  //   const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
-  //     res.status(500).send({
-  //      message: 'Server Error',
-  //      error: err,
-  //    });
-  //  };
+    const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
+      res.status(500).send({
+       message: 'Server Error',
+       error: err,
+     });
+   };
    
-  //  this.app.use(errorHandler);
+   this.app.use(errorHandler);
   }
 
   public listen() {

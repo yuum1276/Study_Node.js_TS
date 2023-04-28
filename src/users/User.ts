@@ -6,6 +6,8 @@ export interface IUser extends RowDataPacket {
   nick: string;
   password: string;
   token: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export default IUser;

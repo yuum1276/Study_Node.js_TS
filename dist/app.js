@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = __importDefault(require("express"));
 var post_route_1 = __importDefault(require("./posts/post.route"));
 var users_route_1 = __importDefault(require("./users/users.route"));
+var comment_route_1 = __importDefault(require("./comment/comment.route"));
 var Server = (function () {
     function Server() {
         var app = express_1.default();
@@ -14,6 +15,7 @@ var Server = (function () {
     Server.prototype.setRouter = function () {
         this.app.use('/posts', post_route_1.default);
         this.app.use('/users', users_route_1.default);
+        this.app.use('/comments', comment_route_1.default);
     };
     Server.prototype.setMiddleware = function () {
         this.app.use(function (req, res, next) {
@@ -28,6 +30,13 @@ var Server = (function () {
             console.log('This is error middleware');
             return res.send({ error: '404 not found error' });
         });
+        var errorHandler = function (err, req, res, next) {
+            res.status(500).send({
+                message: 'Server Error',
+                error: err,
+            });
+        };
+        this.app.use(errorHandler);
     };
     Server.prototype.listen = function () {
         var port = 8000;

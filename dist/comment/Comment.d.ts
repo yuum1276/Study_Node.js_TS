@@ -1,11 +1,12 @@
 import { RowDataPacket } from 'mysql2';
-export interface IUser extends RowDataPacket {
+export interface IComment extends RowDataPacket {
     id: number;
+    postId: number;
     email: string;
     nick: string;
-    password: string;
-    token: string;
+    secret: string;
+    scrtCode: string;
     createdAt: Date;
     updatedAt: Date;
 }
-export default IUser;
+export default IComment;

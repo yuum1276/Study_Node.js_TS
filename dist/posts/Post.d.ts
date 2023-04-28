@@ -6,9 +6,9 @@ export interface IPost extends RowDataPacket {
     token: string;
     email: string;
     secret: string;
-    postCase: string;
     scrtCode: number;
     createdAt: Date;
     updatedAt: Date;
+    comments: DataBoard;
 }
 export default IPost;
