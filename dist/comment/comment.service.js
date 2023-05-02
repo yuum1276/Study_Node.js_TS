@@ -36,8 +36,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.insertComment = exports.getCommentList = void 0;
+exports.reComment = exports.createComment = exports.insertComment = exports.getCommentList = void 0;
 var db_1 = require("../helper/db");
+var token_1 = require("../helper/token");
 var getCommentList = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
     var connection, comments, rows, _i, rows_1, row, err_1;
     return __generator(this, function (_a) {
@@ -74,22 +75,130 @@ var getCommentList = function (req, res, next) { return __awaiter(void 0, void 0
 }); };
 exports.getCommentList = getCommentList;
 var insertComment = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    function getComments(postId, parentCommentId, callback) {
-        connection.query('SELECT * FROM comments WHERE post_id = ? AND parent_comment_id ' + (parentCommentId === null ? 'IS NULL' : '= ?'), parentCommentId === null ? [postId] : [postId, parentCommentId]);
-    }
-    var connection, postId;
+    return __generator(this, function (_a) {
+        return [2];
+    });
+}); };
+exports.insertComment = insertComment;
+var createComment = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    var connection, data, rows, result, result, err_2;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0: return [4, db_1.pool.getConnection()];
             case 1:
                 connection = _a.sent();
-                postId = req.params.postId;
-                getComments(parseInt(postId), null, function (comments) {
-                    res.json(comments);
-                });
-                return [2];
+                _a.label = 2;
+            case 2:
+                _a.trys.push([2, 10, , 11]);
+                data = req.body;
+                if (data.token === '') {
+                    res.send({
+                        message: '로그인 후 사용가능!'
+                    });
+                }
+                return [4, connection.query('SELECT email FROM `users` WHERE `email` = ?', [data.email])];
+            case 3:
+                rows = (_a.sent())[0];
+                if (!(rows.length > 0)) return [3, 9];
+                if (!(token_1.tokenInfo.token === data.token)) return [3, 8];
+                if (!(data.secret === 'Y')) return [3, 5];
+                if (!data.content) {
+                    return [2, res.send({
+                            message: '내용을 입력해주세용'
+                        })];
+                }
+                return [4, connection.query("INSERT INTO comments (post_id, user_id, content, secret) VALUES (?, ?, ?, ?)", [data.post_id, data.user_id, data.content, data.secret])];
+            case 4:
+                result = (_a.sent())[0];
+                return [2, res.send({ state: '🔒SECRET', post_id: data.postId, user_id: data.userId, content: data.content })];
+            case 5:
+                if (!data.content) {
+                    return [2, res.send({
+                            message: '내용을 입력해주세용'
+                        })];
+                }
+                return [4, connection.query("INSERT INTO comments (post_id, user_id, content, secret) VALUES (?, ?, ?, ?)", [data.post_id, data.user_id, data.content, data.secret])];
+            case 6:
+                result = (_a.sent())[0];
+                return [2, res.send({ post_id: data.postId, user_id: data.userId, content: data.content })];
+            case 7: return [3, 9];
+            case 8: return [2, res.send({
+                    message: 'Token 불일치'
+                })];
+            case 9: return [3, 11];
+            case 10:
+                err_2 = _a.sent();
+                console.error(err_2);
+                return [3, 11];
+            case 11: return [2];
         }
     });
 }); };
-exports.insertComment = insertComment;
+exports.createComment = createComment;
+var reComment = function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    var connection, parent_id, data, rows, result, comments, commentMap_1, commentTree_1, err_3;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4, db_1.pool.getConnection()];
+            case 1:
+                connection = _a.sent();
+                parent_id = parseInt(req.params.parent_id);
+                data = req.body;
+                _a.label = 2;
+            case 2:
+                _a.trys.push([2, 6, , 7]);
+                if (data.token === '') {
+                    res.send({
+                        message: '로그인 후 사용가능!',
+                    });
+                }
+                return [4, connection.query('SELECT email FROM `users` WHERE `email` = ?', [data.email])];
+            case 3:
+                rows = (_a.sent())[0];
+                if (!(rows.length > 0)) return [3, 5];
+                if (!(token_1.tokenInfo.token === data.token)) return [3, 5];
+                if (!(data.secret === 'Y')) return [3, 5];
+                if (!data.content) {
+                    return [2, res.send({
+                            message: '내용을 입력해주세용'
+                        })];
+                }
+                return [4, connection.query("SELECT * FROM comments WHERE parent_id = ? ORDER BY created_at ASC", [parent_id])];
+            case 4:
+                result = (_a.sent())[0];
+                comments = result.map(function (row) { return ({
+                    id: row.id,
+                    parent_id: row.parentId,
+                    user_id: row.userId,
+                    content: row.content,
+                    created_at: row,
+                    children: [],
+                }); });
+                commentMap_1 = comments.reduce(function (map, comment) {
+                    map[comment.id] = comment;
+                    return map;
+                }, {});
+                commentTree_1 = [];
+                console.log("commentTree" + commentTree_1);
+                comments.forEach(function (comment) {
+                    if (comment.parent_id !== null) {
+                        var parentComment = commentMap_1[comment.parent_id];
+                        parentComment.children.push(comment);
+                    }
+                    else {
+                        commentTree_1.push(comment);
+                    }
+                });
+                res.json(commentTree_1);
+                _a.label = 5;
+            case 5: return [3, 7];
+            case 6:
+                err_3 = _a.sent();
+                console.error(err_3);
+                return [3, 7];
+            case 7: return [2];
+        }
+    });
+}); };
+exports.reComment = reComment;
 //# sourceMappingURL=comment.service.js.map

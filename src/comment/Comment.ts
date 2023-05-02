@@ -2,12 +2,14 @@ import { RowDataPacket } from 'mysql2';
 
 export interface IComment extends RowDataPacket {
   id: number;
-  postId:number;
   email: string;
-  nick: string;
+  token: string;
+  postId:number;
+  userId: string;
   content: string;
   secret: string;
   scrtCode: string;
+  parentId: number;
   createdAt: Date;
   updatedAt: Date;
 }

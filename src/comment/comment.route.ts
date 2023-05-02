@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getCommentList, insertComment } from './comment.service';
+import { createComment, getCommentList, insertComment, reComment } from './comment.service';
 
 // User routes
 const router = Router();
@@ -7,7 +7,15 @@ const router = Router();
 // GET /comments
 router.get('/', getCommentList);
 
-// GET /comments/:id
-router.get('/:id', insertComment);
+// POST /comments
+router.post('/', createComment);
+
+// // POST /comments/:id
+// router.post('/:id', insertComment);
+
+// GET /commnets/:parent_id
+router.get('/:parent_id', reComment)
+
 
 export default router;
+
